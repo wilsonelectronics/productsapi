@@ -3,8 +3,20 @@
 	"ignore": "test",
 	"package": [
 		{
+			"checksumSHA1": "NkpNQgmrdzGr9HUDL8Bp5YAxt0k=",
+			"path": "cloud.google.com/go/civil",
+			"revision": "2e49e7f73b2c50f68609c2f475c650c4099a7aac",
+			"revisionTime": "2018-08-30T21:53:43Z"
+		},
+		{
 			"checksumSHA1": "OcE/jbvEzkLl88hogGLj/RU68dc=",
 			"path": "github.com/denisenkom/go-mssqldb",
+			"revision": "1eb28afdf9b6e56cf673badd47545f844fe81103",
+			"revisionTime": "2018-09-01T17:21:38Z"
+		},
+		{
+			"checksumSHA1": "wu8t19t2rmyrrfDfdu9v7f/+iag=",
+			"path": "github.com/denisenkom/go-mssqldb/internal/cp",
 			"revision": "1eb28afdf9b6e56cf673badd47545f844fe81103",
 			"revisionTime": "2018-09-01T17:21:38Z"
 		},
@@ -25,6 +37,12 @@
 			"path": "github.com/gorilla/mux",
 			"revision": "e48e440e4c92e3251d812f8ce7858944dfa3331c",
 			"revisionTime": "2018-08-07T07:52:56Z"
+		},
+		{
+			"checksumSHA1": "MCeXr2RNeiG1XG6V+er1OR0qyeo=",
+			"path": "golang.org/x/crypto/md4",
+			"revision": "0709b304e793a5edb4a2c0145f281ecdc20838a4",
+			"revisionTime": "2018-08-31T22:38:59Z"
 		}
 	],
 	"rootPath": "products-api"
