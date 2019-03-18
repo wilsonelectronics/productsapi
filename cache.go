@@ -6,6 +6,7 @@ import (
 	"log"
 	"net/http"
 	"os"
+	"strings"
 	"time"
 
 	"github.com/gomodule/redigo/redis"
@@ -53,14 +54,14 @@ func setCollections() {
 	}
 }
 
-// GetCollection handles requests to get collection names and GUIDs
-func GetCollection(w http.ResponseWriter, r *http.Request) {
+// Collections handles requests to get collection names and GUIDs
+func Collections(w http.ResponseWriter, r *http.Request) {
 	conn := Redis.Conn.Get()
 	defer conn.Close()
 
 	s, err := redis.Bytes(conn.Do("GET", "meta"))
 	if err == redis.ErrNil {
-		log.Println("Collection does not exist!")
+		fmt.Fprintln(w, "Collection does not exist!")
 	}
 
 	col := []Meta{}
@@ -69,4 +70,30 @@ func GetCollection(w http.ResponseWriter, r *http.Request) {
 	collections, _ := json.Marshal(col)
 	w.Header().Set("Content-Type", "application/json")
 	w.Write(collections)
+}
+
+// CollectionProducts returns all product for a given collection
+func CollectionProducts(w http.ResponseWriter, r *http.Request) {
+
+	fmt.Println(r.URL.Path)
+	inputParams := strings.Split(r.URL.Path, "/")
+	collectionID := inputParams[2:]
+	fmt.Println(collectionID)
+
+	conn := Redis.Conn.Get()
+	defer conn.Close()
+
+	s, err := redis.Bytes(conn.Do("GET", collectionID))
+	if err == redis.ErrNil {
+		fmt.Fprintln(w, "The Product for that collection does not exist!")
+		return
+	}
+
+	p := []Meta{}
+
+	err = json.Unmarshal([]byte(s), &p)
+	products, _ := json.Marshal(p)
+	w.Header().Set("Content-Type", "application/json")
+	w.Write(products)
+
 }
