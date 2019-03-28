@@ -21,6 +21,12 @@
 			"revisionTime": "2018-09-01T17:21:38Z"
 		},
 		{
+			"checksumSHA1": "Wp97rIwFg54dNwuCeR9Vslaehtw=",
+			"path": "github.com/golang/protobuf/proto",
+			"revision": "d3c38a4eb4970272b87a425ae00ccc4548e2f9bb",
+			"revisionTime": "2019-03-18T19:48:12Z"
+		},
+		{
 			"checksumSHA1": "ym2VOnOPl3tJJdtmPtirwpHcYVM=",
 			"path": "github.com/gomodule/redigo/redis",
 			"revision": "b47395aa17662ff86cb5c52f3bf669bf842ec27a",
@@ -37,6 +43,12 @@
 			"path": "github.com/gorilla/mux",
 			"revision": "e48e440e4c92e3251d812f8ce7858944dfa3331c",
 			"revisionTime": "2018-08-07T07:52:56Z"
+		},
+		{
+			"checksumSHA1": "FB/yNfVKN9oMIcujaaQKAiBYbMM=",
+			"path": "github.com/piotrkowalczuk/ntypes",
+			"revision": "15ae4dd32dbf658695648fdc52750c9c73223b71",
+			"revisionTime": "2018-12-05T12:46:20Z"
 		},
 		{
 			"checksumSHA1": "MCeXr2RNeiG1XG6V+er1OR0qyeo=",

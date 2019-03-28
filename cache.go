@@ -23,6 +23,7 @@ func init() {
 	fmt.Println("Cache.go hit!!")
 	Redis = &redisHelper{Conn: newPool()}
 	setCollections()
+	setCollectionProducts()
 }
 
 func newPool() *redis.Pool {
@@ -52,6 +53,15 @@ func setCollections() {
 	if err != nil {
 		log.Println(err)
 	}
+}
+
+func setCollectionProducts() {
+	conn := Redis.Conn.Get()
+	defer conn.Close()
+
+	collectionProducts := GetCollectionProducts()
+
+	fmt.Println(collectionProducts)
 }
 
 // Collections handles requests to get collection names and GUIDs

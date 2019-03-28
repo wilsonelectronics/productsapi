@@ -1,42 +1,50 @@
 package main
 
 import (
+	"fmt"
 	"log"
 	"products-api/data"
+
+	"github.com/piotrkowalczuk/ntypes"
 )
 
 // Meta . . .
 type Meta struct {
-	CollectionGUID string `json:"collectionGuid"`
-	CollectionName string `json:"collectionName"`
-	*Products      `json:"products,omitempty"`
+	CategoryGUID     string        `json:"collectionGuid,omitempty"`
+	CategoryName     string        `json:"collectionName,omitempty"`
+	CategoryHandle   string        `json:"collectionHandle,omitempty"`
+	Description      string        `json:"collectionDescription,omitempty"`
+	CategoryImageURL ntypes.String `json:"collectionImage,omitempty"`
+	*Products        `json:"products,omitempty"`
 }
 
 // ProductData . . .
 type ProductData struct {
-	CategoryID       string `json:"categoryId"`
-	ProductID        string `json:"productId"`
-	SKU              string `json:"sku"`
-	Title            string `json:"title"`
-	DescriptionShort string `json:"descriptionShort"`
-	Price            string `json:"price"`
-	ImageURL         string `json:"imageURL"`
-	Handle           string `json:"handle"`
-	ShopifyID        string `json:"shopifyId"`
+	CategoryID       string
+	ProductID        string
+	SKU              string
+	Title            string
+	DescriptionShort string
+	Price            string
+	ImageURL         string
+	Handle           string
+	ShopifyID        string
 }
 
 // Products . . .
 type Products struct {
-	Products []*Product `json:"product,omitempty"`
+	CategoryID string    `json:"collectionID,omitempty"`
+	Product    []Product `json:"products,omitempty"`
 }
 
 // Product . . .
 type Product struct {
-	Handle string `json:"handle,omitempty"`
-	Name   string `json:"name,omitempty"`
-	SKU    string `json:"sku,omitempty"`
-	Images images
-	HTML   html
+	CategoryID string `json:"collectionGuid,omitempty"`
+	Handle     string `json:"handle,omitempty"`
+	Name       string `json:"name,omitempty"`
+	SKU        string `json:"sku,omitempty"`
+	Images     images
+	HTML       html
 }
 
 type images struct {
@@ -44,7 +52,9 @@ type images struct {
 }
 
 type mainImages struct {
-	ImageURL string `json:"imageURL,omitempty"`
+	Large  string `json:"large,omitempty"`
+	Medium string `json:"medium,omitempty"`
+	Small  string `json:"small,omitempty"`
 }
 
 type html struct {
@@ -73,8 +83,11 @@ func GetCollections() []Meta {
 		c := Meta{}
 
 		if err = rows.Scan(
-			&c.CollectionGUID,
-			&c.CollectionName,
+			&c.CategoryGUID,
+			&c.CategoryName,
+			&c.CategoryHandle,
+			&c.Description,
+			&c.CategoryImageURL,
 		); err != nil {
 			log.Println("Query failed 2: ", err)
 			return nil
@@ -93,7 +106,7 @@ func GetCollectionProducts() []Products {
 	}
 	defer db.Close()
 
-	rows, err := db.Query("set nocount on; exec [spcProductGet]")
+	rows, err := db.Query("set nocount on; exec [spcProductCategoryGet]")
 	if err != nil {
 		log.Println("CollectionProducts query failed: ", err)
 		return nil
@@ -121,15 +134,34 @@ func GetCollectionProducts() []Products {
 		collectionProducts = append(collectionProducts, p)
 	}
 
-	var product []Product
+	var products []Products
 	for _, p := range collectionProducts {
-		pIndex := getProductIndex(product, p.SKU)
+		cIndex := collectionIndex(products, p.CategoryID)
+		if cIndex == -1 {
+			newProdCollection := Products{CategoryID: p.CategoryID}
+			products = append(products, newProdCollection)
+			cIndex = len(products) - 1
+		}
+
+		pIndex := getProductIndex(products[cIndex].Product, p.SKU)
 		if pIndex == -1 {
-			//newProduct := Product{SKU: p.SKU}
+			newProduct := Product{CategoryID: p.CategoryID, Handle: p.Handle, Name: p.Title, SKU: p.SKU}
+			products[pIndex].Product = append(products[pIndex].Product, newProduct)
+			pIndex = len(products) - 1
 		}
 	}
 
-	return nil
+	fmt.Println(products)
+	return products
+}
+
+func collectionIndex(arr []Products, CategoryID string) int {
+	for k, v := range arr {
+		if v.CategoryID == CategoryID {
+			return k
+		}
+	}
+	return -1
 }
 
 func getProductIndex(arr []Product, SKU string) int {
