@@ -60,8 +60,8 @@ func setCollectionProducts() {
 	defer conn.Close()
 
 	collectionProducts := GetCollectionProducts()
-
-	fmt.Println(collectionProducts)
+	c, _ := json.Marshal(collectionProducts)
+	fmt.Println(string(c))
 }
 
 // Collections handles requests to get collection names and GUIDs

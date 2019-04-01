@@ -1,7 +1,6 @@
 package main
 
 import (
-	"fmt"
 	"log"
 	"products-api/data"
 
@@ -43,21 +42,17 @@ type Product struct {
 	Handle     string `json:"handle,omitempty"`
 	Name       string `json:"name,omitempty"`
 	SKU        string `json:"sku,omitempty"`
-	Images     images
-	HTML       html
+	Images     []Images
+	HTML       []HTML
 }
 
-type images struct {
-	Main mainImages
-}
-
-type mainImages struct {
+type Images struct {
 	Large  string `json:"large,omitempty"`
 	Medium string `json:"medium,omitempty"`
 	Small  string `json:"small,omitempty"`
 }
 
-type html struct {
+type HTML struct {
 	DescriptionShort string `json:"descriptionShort,omitempty"`
 }
 
@@ -113,26 +108,82 @@ func GetCollectionProducts() []Products {
 	}
 	defer rows.Close()
 
-	collectionProducts := []ProductData{}
-
-	for rows.Next() {
-		p := ProductData{}
-
-		if err = rows.Scan(
-			&p.CategoryID,
-			&p.ProductID,
-			&p.SKU,
-			&p.Title,
-			&p.DescriptionShort,
-			&p.Price,
-			&p.ImageURL,
-			&p.Handle,
-			&p.ShopifyID,
-		); err != nil {
-			return nil
-		}
-		collectionProducts = append(collectionProducts, p)
+	var collectionProducts = []ProductData{
+		{
+			CategoryID:       "123123123",
+			ProductID:        "213123123",
+			SKU:              "123123",
+			Title:            "test 1",
+			DescriptionShort: "testing 1 2 3",
+			Price:            "99.99",
+			ImageURL:         "http.wordpress.com",
+			Handle:           "handle",
+			ShopifyID:        "shopify",
+		},
+		{
+			CategoryID:       "12",
+			ProductID:        "23123",
+			SKU:              "123123",
+			Title:            "test 2",
+			DescriptionShort: "testing 1 2 3 4 5 6",
+			Price:            "99.99",
+			ImageURL:         "http.wordpress.com",
+			Handle:           "handle",
+			ShopifyID:        "shopify",
+		},
+		{
+			CategoryID:       "123",
+			ProductID:        "213123123",
+			SKU:              "12",
+			Title:            "test 3",
+			DescriptionShort: "testing 1 2 3 4 5 6 7 8 9",
+			Price:            "99.99",
+			ImageURL:         "http.wordpress.com",
+			Handle:           "handle",
+			ShopifyID:        "shopify",
+		},
+		{
+			CategoryID:       "123123123",
+			ProductID:        "213233",
+			SKU:              "1231",
+			Title:            "test 1",
+			DescriptionShort: "testing 1 ",
+			Price:            "99.99",
+			ImageURL:         "http.wordpress.com",
+			Handle:           "handle",
+			ShopifyID:        "shopify",
+		},
+		{
+			CategoryID:       "123123123",
+			ProductID:        "213345343",
+			SKU:              "1233",
+			Title:            "test 1",
+			DescriptionShort: "testing 1 ",
+			Price:            "1000.99",
+			ImageURL:         "http.wordpress.com",
+			Handle:           "handle",
+			ShopifyID:        "shopify",
+		},
 	}
+
+	// for rows.Next() {
+	// 	p := ProductData{}
+
+	// 	if err = rows.Scan(
+	// 		&p.CategoryID,
+	// 		&p.ProductID,
+	// 		&p.SKU,
+	// 		&p.Title,
+	// 		&p.DescriptionShort,
+	// 		&p.Price,
+	// 		&p.ImageURL,
+	// 		&p.Handle,
+	// 		&p.ShopifyID,
+	// 	); err != nil {
+	// 		return nil
+	// 	}
+	// 	collectionProducts = append(collectionProducts, p)
+	// }
 
 	var products []Products
 	for _, p := range collectionProducts {
@@ -146,12 +197,18 @@ func GetCollectionProducts() []Products {
 		pIndex := getProductIndex(products[cIndex].Product, p.SKU)
 		if pIndex == -1 {
 			newProduct := Product{CategoryID: p.CategoryID, Handle: p.Handle, Name: p.Title, SKU: p.SKU}
-			products[pIndex].Product = append(products[pIndex].Product, newProduct)
-			pIndex = len(products) - 1
+			products[cIndex].Product = append(products[cIndex].Product, newProduct)
+			pIndex = len(products[cIndex].Product) - 1
+		}
+
+		if p.SKU == p.SKU {
+			newImage := Images{Large: p.ImageURL}
+			products[cIndex].Product[pIndex].Images = append(products[cIndex].Product[pIndex].Images, newImage)
+			newHTML := HTML{DescriptionShort: p.DescriptionShort}
+			products[cIndex].Product[pIndex].HTML = append(products[cIndex].Product[pIndex].HTML, newHTML)
 		}
 	}
-
-	fmt.Println(products)
+	// p, _ := json.Marshal(products)
 	return products
 }
 
