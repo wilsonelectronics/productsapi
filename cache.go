@@ -60,8 +60,14 @@ func setCollectionProducts() {
 	defer conn.Close()
 
 	collectionProducts := GetCollectionProducts()
-	c, _ := json.Marshal(collectionProducts)
-	fmt.Println(string(c))
+	for _, cp := range collectionProducts {
+		c, _ := json.Marshal(collectionProducts)
+
+		_, err := conn.Do("SET", cp.CategoryID, c)
+		if err != nil {
+			log.Println(err)
+		}
+	}
 }
 
 // Collections handles requests to get collection names and GUIDs
@@ -88,18 +94,18 @@ func CollectionProducts(w http.ResponseWriter, r *http.Request) {
 	fmt.Println(r.URL.Path)
 	inputParams := strings.Split(r.URL.Path, "/")
 	collectionID := inputParams[2:]
-	fmt.Println(collectionID)
+	fmt.Println(collectionID[0])
 
 	conn := Redis.Conn.Get()
 	defer conn.Close()
 
-	s, err := redis.Bytes(conn.Do("GET", collectionID))
+	s, err := redis.Bytes(conn.Do("GET", string(collectionID[0])))
 	if err == redis.ErrNil {
 		fmt.Fprintln(w, "The Product for that collection does not exist!")
 		return
 	}
 
-	p := []Meta{}
+	p := []Products{}
 
 	err = json.Unmarshal([]byte(s), &p)
 	products, _ := json.Marshal(p)
