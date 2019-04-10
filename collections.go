@@ -18,7 +18,7 @@ type Meta struct {
 }
 
 // ProductData . . .
-type ProductData struct {
+type CollectionProductData struct {
 	CategoryID       string
 	ProductID        string
 	SKU              string
@@ -108,7 +108,7 @@ func GetCollectionProducts() []Products {
 	}
 	defer rows.Close()
 
-	var collectionProducts = []ProductData{
+	var collectionProducts = []CollectionProductData{
 		{
 			CategoryID:       "123123123",
 			ProductID:        "213123123",
