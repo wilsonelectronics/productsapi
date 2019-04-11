@@ -64,10 +64,22 @@ func setCollectionProducts() {
 		c, _ := json.Marshal(collectionProducts)
 
 		_, err := conn.Do("SET", cp.CategoryID, c)
+
+		for _, p := range cp.Product {
+			setProducts(p.SKU)
+		}
 		if err != nil {
 			log.Println(err)
 		}
 	}
+}
+
+func setProducts(sku string) {
+	conn := Redis.Conn.Get()
+	defer conn.Close()
+
+	products := getProduct("d4a559dd-ea1e-40ea-951a-2c6effabf00a", sku)
+	fmt.Println(products)
 }
 
 // Collections handles requests to get collection names and GUIDs
