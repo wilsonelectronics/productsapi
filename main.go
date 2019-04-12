@@ -32,6 +32,9 @@ func main() {
 	methods := handlers.AllowedMethods([]string{"GET"})
 	headers := handlers.AllowedHeaders([]string{"Content-Type", "*"})
 	origins := handlers.AllowedOrigins([]string{"https://localhost:3000",
+		"http://localhost:3000",
+		"https://localhost:4000",
+		"http://localhost:4000",
 		"https://wilsonpro.ca",
 		"https://wilsonpro.com",
 		"https://www.weboost.com/",
