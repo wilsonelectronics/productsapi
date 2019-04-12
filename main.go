@@ -26,8 +26,9 @@ func main() {
 
 	r := mux.NewRouter()
 
-	r.HandleFunc("/collections", Collections).Methods("GET")
-	r.HandleFunc("/collections/{collectionGUID}", CollectionProducts)
+	r.HandleFunc("/collections/{domain}", Collections).Methods("GET")
+	r.HandleFunc("/collections/{collectionGuid}", CollectionProducts)
+	//r.HandleFunc("/product/{sku}", GetProduct)
 
 	methods := handlers.AllowedMethods([]string{"GET"})
 	headers := handlers.AllowedHeaders([]string{"Content-Type", "*"})

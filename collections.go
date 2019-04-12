@@ -32,8 +32,8 @@ type CollectionProductData struct {
 
 // Products . . .
 type Products struct {
-	CategoryID string    `json:"collectionID,omitempty"`
-	Product    []Product `json:"products,omitempty"`
+	CategoryID string    `json:"collectionGuid,omitempty"`
+	Products   []Product `json:"products,omitempty"`
 }
 
 // Product . . .
@@ -108,82 +108,82 @@ func GetCollectionProducts() []Products {
 	}
 	defer rows.Close()
 
-	// var collectionProducts = []CollectionProductData{
-	// 	{
-	// 		CategoryID:       "123123123",
-	// 		ProductID:        "213123123",
-	// 		SKU:              "123123",
-	// 		Title:            "test 1",
-	// 		DescriptionShort: "testing 1 2 3",
-	// 		Price:            "99.99",
-	// 		ImageURL:         "http.wordpress.com",
-	// 		Handle:           "handle",
-	// 		ShopifyID:        "shopify",
-	// 	},
-	// 	{
-	// 		CategoryID:       "12",
-	// 		ProductID:        "23123",
-	// 		SKU:              "123123",
-	// 		Title:            "test 2",
-	// 		DescriptionShort: "testing 1 2 3 4 5 6",
-	// 		Price:            "99.99",
-	// 		ImageURL:         "http.wordpress.com",
-	// 		Handle:           "handle",
-	// 		ShopifyID:        "shopify",
-	// 	},
-	// 	{
-	// 		CategoryID:       "123",
-	// 		ProductID:        "213123123",
-	// 		SKU:              "12",
-	// 		Title:            "test 3",
-	// 		DescriptionShort: "testing 1 2 3 4 5 6 7 8 9",
-	// 		Price:            "99.99",
-	// 		ImageURL:         "http.wordpress.com",
-	// 		Handle:           "handle",
-	// 		ShopifyID:        "shopify",
-	// 	},
-	// 	{
-	// 		CategoryID:       "123123123",
-	// 		ProductID:        "213233",
-	// 		SKU:              "1231",
-	// 		Title:            "test 1",
-	// 		DescriptionShort: "testing 1 ",
-	// 		Price:            "99.99",
-	// 		ImageURL:         "http.wordpress.com",
-	// 		Handle:           "handle",
-	// 		ShopifyID:        "shopify",
-	// 	},
-	// 	{
-	// 		CategoryID:       "123123123",
-	// 		ProductID:        "213345343",
-	// 		SKU:              "1233",
-	// 		Title:            "test 1",
-	// 		DescriptionShort: "testing 1 ",
-	// 		Price:            "1000.99",
-	// 		ImageURL:         "http.wordpress.com",
-	// 		Handle:           "handle",
-	// 		ShopifyID:        "shopify",
-	// 	},
-	// }
-	collectionProducts := []CollectionProductData{}
-	for rows.Next() {
-		p := CollectionProductData{}
-
-		if err = rows.Scan(
-			&p.CategoryID,
-			&p.ProductID,
-			&p.SKU,
-			&p.Title,
-			&p.DescriptionShort,
-			&p.Price,
-			&p.ImageURL,
-			&p.Handle,
-			&p.ShopifyID,
-		); err != nil {
-			return nil
-		}
-		collectionProducts = append(collectionProducts, p)
+	var collectionProducts = []CollectionProductData{
+		{
+			CategoryID:       "1",
+			ProductID:        "213123123",
+			SKU:              "123123",
+			Title:            "test 1",
+			DescriptionShort: "testing 1 2 3",
+			Price:            "99.99",
+			ImageURL:         "http.wordpress.com",
+			Handle:           "handle",
+			ShopifyID:        "shopify",
+		},
+		{
+			CategoryID:       "2",
+			ProductID:        "23123",
+			SKU:              "123123",
+			Title:            "test 2",
+			DescriptionShort: "testing 1 2 3 4 5 6",
+			Price:            "99.99",
+			ImageURL:         "http.wordpress.com",
+			Handle:           "handle",
+			ShopifyID:        "shopify",
+		},
+		{
+			CategoryID:       "3",
+			ProductID:        "213123123",
+			SKU:              "12",
+			Title:            "test 3",
+			DescriptionShort: "testing 1 2 3 4 5 6 7 8 9",
+			Price:            "99.99",
+			ImageURL:         "http.wordpress.com",
+			Handle:           "handle",
+			ShopifyID:        "shopify",
+		},
+		{
+			CategoryID:       "1",
+			ProductID:        "213233",
+			SKU:              "1231",
+			Title:            "test 1",
+			DescriptionShort: "testing 1 ",
+			Price:            "99.99",
+			ImageURL:         "http.wordpress.com",
+			Handle:           "handle",
+			ShopifyID:        "shopify",
+		},
+		{
+			CategoryID:       "1",
+			ProductID:        "213345343",
+			SKU:              "1233",
+			Title:            "test 1",
+			DescriptionShort: "testing 1 ",
+			Price:            "1000.99",
+			ImageURL:         "http.wordpress.com",
+			Handle:           "handle",
+			ShopifyID:        "shopify",
+		},
 	}
+	// collectionProducts := []CollectionProductData{}
+	// for rows.Next() {
+	// 	p := CollectionProductData{}
+
+	// 	if err = rows.Scan(
+	// 		&p.CategoryID,
+	// 		&p.ProductID,
+	// 		&p.SKU,
+	// 		&p.Title,
+	// 		&p.DescriptionShort,
+	// 		&p.Price,
+	// 		&p.ImageURL,
+	// 		&p.Handle,
+	// 		&p.ShopifyID,
+	// 	); err != nil {
+	// 		return nil
+	// 	}
+	// 	collectionProducts = append(collectionProducts, p)
+	// }
 
 	var products []Products
 	for _, p := range collectionProducts {
@@ -194,20 +194,25 @@ func GetCollectionProducts() []Products {
 			cIndex = len(products) - 1
 		}
 
-		pIndex := getProductIndex(products[cIndex].Product, p.SKU)
+		pIndex := getProductIndex(products[cIndex].Products, p.SKU)
 		if pIndex == -1 {
 			newProduct := Product{CategoryID: p.CategoryID, Handle: p.Handle, Name: p.Title, SKU: p.SKU}
-			products[cIndex].Product = append(products[cIndex].Product, newProduct)
-			pIndex = len(products[cIndex].Product) - 1
+			products[cIndex].Products = append(products[cIndex].Products, newProduct)
+			pIndex = len(products[cIndex].Products) - 1
 		}
 
 		if p.SKU == p.SKU {
 			newImage := Images{Large: p.ImageURL}
-			products[cIndex].Product[pIndex].Images = append(products[cIndex].Product[pIndex].Images, newImage)
+			products[cIndex].Products[pIndex].Images = append(products[cIndex].Products[pIndex].Images, newImage)
 			newHTML := HTML{DescriptionShort: p.DescriptionShort}
-			products[cIndex].Product[pIndex].HTML = append(products[cIndex].Product[pIndex].HTML, newHTML)
+			products[cIndex].Products[pIndex].HTML = append(products[cIndex].Products[pIndex].HTML, newHTML)
 		}
+		setCollectionProducts(products)
 	}
+
+	// for _, v := range products {
+
+	// }
 	// p, _ := json.Marshal(products)
 	return products
 }

@@ -6,7 +6,6 @@ import (
 	"log"
 	"net/http"
 	"os"
-	"strings"
 	"time"
 
 	"github.com/gomodule/redigo/redis"
@@ -23,7 +22,8 @@ func init() {
 	fmt.Println("Cache.go hit!!")
 	Redis = &redisHelper{Conn: newPool()}
 	setCollections()
-	setCollectionProducts()
+	GetCollectionProducts()
+	// setCollectionProducts()
 }
 
 func newPool() *redis.Pool {
@@ -55,23 +55,23 @@ func setCollections() {
 	}
 }
 
-func setCollectionProducts() {
+func setCollectionProducts(products []Products) {
 	conn := Redis.Conn.Get()
 	defer conn.Close()
+	for _, v := range products {
 
-	collectionProducts := GetCollectionProducts()
-	for _, cp := range collectionProducts {
-		c, _ := json.Marshal(collectionProducts)
+		c, _ := json.Marshal(v.Products)
 
-		_, err := conn.Do("SET", cp.CategoryID, c)
-
-		for _, p := range cp.Product {
-			setProducts(p.SKU)
-		}
+		_, err := conn.Do("SET", v.CategoryID, c)
 		if err != nil {
 			log.Println(err)
+
 		}
 	}
+	// for _, p := range cp.Product {
+	// 	setProducts(p.SKU)
+	// }
+
 }
 
 func setProducts(sku string) {
@@ -104,20 +104,21 @@ func Collections(w http.ResponseWriter, r *http.Request) {
 func CollectionProducts(w http.ResponseWriter, r *http.Request) {
 
 	fmt.Println(r.URL.Path)
-	inputParams := strings.Split(r.URL.Path, "/")
-	collectionID := inputParams[2:]
-	fmt.Println(collectionID[0])
+	// inputParams := strings.Split(r.URL.Path, "/")
+	// collectionID := inputParams[2:]
+	// fmt.Println(collectionID[0])
+	id := r.FormValue("id")
 
 	conn := Redis.Conn.Get()
 	defer conn.Close()
 
-	s, err := redis.Bytes(conn.Do("GET", string(collectionID[0])))
+	s, err := redis.Bytes(conn.Do("GET", id))
 	if err == redis.ErrNil {
 		fmt.Fprintln(w, "The Product for that collection does not exist!")
 		return
 	}
 
-	p := []Products{}
+	var p []Product
 
 	err = json.Unmarshal([]byte(s), &p)
 	products, _ := json.Marshal(p)
