@@ -5,12 +5,11 @@ import (
 	"log"
 	"net/http"
 	"os"
-
-	"github.com/gorilla/mux"
-
-	"github.com/gorilla/handlers"
+	"products-api/controller"
 
 	_ "github.com/denisenkom/go-mssqldb"
+	"github.com/gorilla/handlers"
+	"github.com/gorilla/mux"
 )
 
 func setPort() string {
@@ -26,9 +25,9 @@ func main() {
 
 	r := mux.NewRouter()
 
-	r.HandleFunc("/collections/{domain}", Collections).Methods("GET")
-	r.HandleFunc("/collections/{collectionGuid}", CollectionProducts)
-	//r.HandleFunc("/product/{sku}", GetProduct)
+	// r.HandleFunc("/collections", GetCachedCollections).Methods("GET")
+	// r.HandleFunc("/collection/{collectionGuid}", GetCachedCollectionProducts).Methods("GET")
+	r.HandleFunc("/product/{guid}", controller.GetSingleProduct)
 
 	methods := handlers.AllowedMethods([]string{"GET"})
 	headers := handlers.AllowedHeaders([]string{"Content-Type", "*"})
