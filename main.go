@@ -26,7 +26,7 @@ func main() {
 
 	r := mux.NewRouter()
 
-	r.HandleFunc("/collections/{domain}", Collections).Methods("GET")
+	r.HandleFunc("/collections", Collections).Methods("GET")
 	r.HandleFunc("/collections/{collectionGuid}", CollectionProducts)
 	//r.HandleFunc("/product/{sku}", GetProduct)
 
