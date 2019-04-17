@@ -1,7 +1,6 @@
 package main
 
 import (
-	"fmt"
 	"log"
 	"net/http"
 	"os"
@@ -12,17 +11,7 @@ import (
 	"github.com/gorilla/mux"
 )
 
-func setPort() string {
-	port := os.Getenv("PORT")
-	if port == "" {
-		return "$PORT not set"
-	}
-	return ":" + port
-}
-
 func main() {
-	fmt.Println("Backend API!!")
-
 	r := mux.NewRouter()
 
 	r.HandleFunc("/tags", controller.GetTags)
@@ -44,7 +33,9 @@ func main() {
 		"https://staging-wilsonpro-canada-api.herokuapp.com",
 		"https://wilsonpro-canada-staging.herokuapp.com/",
 	})
-	addr := setPort()
 
-	log.Fatal(http.ListenAndServe(addr, handlers.CORS(methods, origins, headers)(r)))
+	port := os.Getenv("PORT")
+	if port != "" {
+		log.Fatal(http.ListenAndServe(":"+port, handlers.CORS(methods, origins, headers)(r)))
+	}
 }
