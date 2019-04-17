@@ -42,6 +42,7 @@ func main() {
 		"https://staging.wilsonpro.ca",
 		"https://staging.wilsonpro.com/",
 		"https://staging-wilsonpro-canada-api.herokuapp.com",
+		"https://wilsonpro-canada-staging.herokuapp.com/",
 	})
 	addr := setPort()
 
