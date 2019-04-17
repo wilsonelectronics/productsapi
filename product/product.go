@@ -3,7 +3,6 @@ package product
 import (
 	"encoding/json"
 	"fmt"
-	"log"
 	"products-api/cache"
 	"products-api/data"
 
@@ -12,11 +11,11 @@ import (
 
 // Product . . .
 type Product struct {
-	ProductGUID     string                  `json:"productGuid"`
+	ProductGUID     string                  `json:"guid"`
 	SKU             string                  `json:"sku"`
 	ProductTypeID   int                     `json:"productTypeId"`
 	ProductType     string                  `json:"productType"`
-	UPC             string                  `json:"upc,omitempty"`
+	UPC             string                  `json:"upc"`
 	Details         *details                `json:"details"`
 	Tags            []*productTag           `json:"tags"`
 	Kits            []*kit                  `json:"kits"`
@@ -27,13 +26,12 @@ type Product struct {
 	RelatedProducts []*relatedProduct       `json:"relatedProducts"`
 }
 
-// details . . .
 type details struct {
 	Description      ntypes.String `json:"description"`
-	DescriptionShort ntypes.String `json:"descriptionShort,omitempty"`
+	DescriptionShort ntypes.String `json:"descriptionShort"`
 	Title            string        `json:"title"`
-	TitleTag         ntypes.String `json:"titleTag,omitempty"`
-	BodyHTML         ntypes.String `json:"body_HTML,omitempty"`
+	TitleTag         ntypes.String `json:"titleTag"`
+	BodyHTML         ntypes.String `json:"body_HTML"`
 	Price            float64       `json:"price"`
 	ImageURL         string        `json:"imageURL"`
 	Handle           string        `json:"handle"`
@@ -42,71 +40,65 @@ type details struct {
 	IsDeleted        bool          `json:"isDeleted"`
 }
 
-// kit . . .
 type kit struct {
 	ProductSiteKitGUID string        `json:"productSiteKitId"`
-	ProductGUID        string        `json:"productGuid,omitempty"`
-	KitItemName        string        `json:"kitItemName,omitempty"`
-	KitItemLinkURL     ntypes.String `json:"kitItemLinkURL,omitempty"`
-	KitItemIconURL     string        `json:"kitItemIconURL,omitempty"`
-	ItemOrder          int           `json:"ItemOrder,omitempty"`
+	ProductGUID        string        `json:"productGuid"`
+	KitItemName        string        `json:"kitItemName"`
+	KitItemLinkURL     ntypes.String `json:"kitItemLinkURL"`
+	KitItemIconURL     string        `json:"kitItemIconURL"`
+	ItemOrder          int           `json:"ItemOrder"`
 }
 
-// media . . .
 type media struct {
 	ProductSiteMediaGUID string        `json:"productSiteMediaId"`
 	ProductGUID          string        `json:"productGuid"`
-	MediaTypeID          int           `json:"mediaTypeId,omitempty"`
-	MediaTitle           ntypes.String `json:"mediaTitle,omitempty"`
-	MediaLinkURL         ntypes.String `json:"mediaLinkURL,omitempty"`
-	MediaLogoURL         ntypes.String `json:"mediaLogoURL,omitempty"`
-	MediaOrder           int           `json:"mediaOrder,omitempty"`
-	IsActive             bool          `json:"isActive,omitempty"`
+	MediaTypeID          int           `json:"mediaTypeId"`
+	MediaTitle           ntypes.String `json:"mediaTitle"`
+	MediaLinkURL         ntypes.String `json:"mediaLinkURL"`
+	MediaLogoURL         ntypes.String `json:"mediaLogoURL"`
+	MediaOrder           int           `json:"mediaOrder"`
+	IsActive             bool          `json:"isActive"`
 }
 
-// note . . .
 type note struct {
-	ProductSiteNoteGUID string `json:"productSiteNoteId,omitempty"`
-	ProductGUID         string `json:"productGuid,omitempty"`
-	NoteTypeID          int    `json:"noteTypeId,omitempty"`
-	NoteText            string `json:"noteText,omitempty"`
-	NoteOrder           int    `json:"noteOrder,omitempty"`
+	ProductSiteNoteGUID string `json:"productSiteNoteId"`
+	ProductGUID         string `json:"productGuid"`
+	NoteTypeID          int    `json:"noteTypeId"`
+	NoteText            string `json:"noteText"`
+	NoteOrder           int    `json:"noteOrder"`
 }
 
-// productSpecification . . .
 type productSpecification struct {
-	ProductSiteSpecificationsGUID string `json:"productSiteSpecificationsId,omitempty"`
-	ProductGUID                   string `json:"productGuid,omitempty"`
-	SpecificationID               int    `json:"specificationId,omitempty"`
-	SpecificationLabel            string `json:"specificationLabel,omitempty"`
-	FieldValue                    string `json:"specificationValue,omitempty"`
-	IsActive                      bool   `json:"isActive,omitempty"`
+	ProductSiteSpecificationsGUID string `json:"id"`
+	ProductGUID                   string `json:"productGuid"`
+	SpecificationID               int    `json:"specificationId"`
+	FieldValue                    string `json:"specificationValue"`
+	IsActive                      bool   `json:"isActive"`
 }
 
-// productVendor . . .
 type productVendor struct {
-	ProductSiteVendorGUID string `json:"productSiteVendorId,omitempty"`
-	ProductGUID           string `json:"productGuid,omitempty"`
-	VendorID              int    `json:"vendorId,omitempty"`
-	VendorName            string `json:"vendorName,omitempty"`
-	VendorImageURL        string `json:"vendorImageURL,omitempty"`
-	ProductVendorURL      string `json:"productVendorURL,omitempty"`
+	ProductSiteVendorGUID string `json:"id"`
+	ProductGUID           string `json:"productGuid"`
+	VendorID              int    `json:"vendorId"`
+	VendorName            string `json:"vendorName"`
+	VendorImageURL        string `json:"vendorImageURL"`
+	ProductVendorURL      string `json:"productVendorURL"`
 }
 
-// relatedProduct . . .
 type relatedProduct struct {
-	ProductSiteRelatedGUID string `json:"productSiteRelatedId,omitempty"`
-	ProductGUID            string `json:"productGuid,omitempty"`
-	SKU                    string `json:"sku,omitempty"`
-	ImageURL               string `json:"imageURL,omitempty"`
-	OrderID                int    `json:"orderId,omitempty"`
+	ProductSiteRelatedGUID string `json:"id"`
+	ProductGUID            string `json:"productGuid"`
+	SKU                    string `json:"sku"`
+	ImageURL               string `json:"imageURL"`
+	OrderID                int    `json:"orderId"`
 }
 
 type productTag struct {
-	ProductSiteTagGUID string `json:"productSiteTagId"`
+	ProductSiteTagGUID string `json:"id"`
 	ProductGUID        string `json:"productGuid"`
 	TagID              int    `json:"tagID"`
 	Tag                string `json:"tag"`
+	IsActive           bool   `json:"isActive"`
 }
 
 // GetByID . . .
@@ -152,7 +144,7 @@ func getFromDbAndCache(id string) (*Product, error) {
 		&product.Details.IsActive,
 		&product.Details.IsDeleted,
 	); err != nil {
-		return nil, err
+		return nil, fmt.Errorf("spcProductGet Query Scan failed: %s", err)
 	}
 
 	if product.Kits, err = getKits(id); err != nil {
@@ -195,7 +187,7 @@ func getKits(id string) ([]*kit, error) {
 
 	rows, err := db.Query("set nocount on; exec [spcProductKitGet] ?", id)
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("spcProductKitGet Query failed: %s", err)
 	}
 	defer rows.Close()
 
@@ -210,13 +202,12 @@ func getKits(id string) ([]*kit, error) {
 			&k.KitItemName,
 			&k.KitItemLinkURL,
 			&k.KitItemIconURL,
-			&k.ItemOrder,
-		); err != nil {
-			log.Println("Error in spcProductKitGet: ", err)
+			&k.ItemOrder); err != nil {
+			return nil, fmt.Errorf("spcProductKitGet Query Scan failed: %s", err)
 		}
 		kits = append(kits, k)
 	}
-	return kits, err
+	return kits, nil
 }
 
 func getVendors(id string) ([]*productVendor, error) {
@@ -228,8 +219,7 @@ func getVendors(id string) ([]*productVendor, error) {
 
 	rows, err := db.Query("set nocount on; exec [spcProductVendorGet] ?", id)
 	if err != nil {
-		log.Println("Product Vendor Query failed: ", err)
-		return nil, err
+		return nil, fmt.Errorf("spcProductVendorGet Query failed: %s", err)
 	}
 	defer rows.Close()
 
@@ -246,7 +236,7 @@ func getVendors(id string) ([]*productVendor, error) {
 			&v.VendorImageURL,
 			&v.ProductVendorURL,
 		); err != nil {
-			return nil, err
+			return nil, fmt.Errorf("spcProductVendorGet Query Scan failed: %s", err)
 		}
 		vendors = append(vendors, v)
 	}
@@ -262,8 +252,7 @@ func getRelatedProducts(id string) ([]*relatedProduct, error) {
 
 	rows, err := db.Query("set nocount on; exec [spcProductRelatedGet] ?", id)
 	if err != nil {
-		log.Println("getRelatedProduct Query failed: ", err)
-		return nil, err
+		return nil, fmt.Errorf("spcProductRelatedGet Query failed: %s", err)
 	}
 	defer rows.Close()
 
@@ -279,8 +268,7 @@ func getRelatedProducts(id string) ([]*relatedProduct, error) {
 			&r.ImageURL,
 			&r.OrderID,
 		); err != nil {
-			log.Println(err)
-			return nil, err
+			return nil, fmt.Errorf("spcProductRelatedGet Query Scan failed: %s", err)
 		}
 		related = append(related, r)
 	}
@@ -310,11 +298,9 @@ func getSpecifications(id string) ([]*productSpecification, error) {
 			&s.ProductSiteSpecificationsGUID,
 			&s.ProductGUID,
 			&s.SpecificationID,
-			&s.SpecificationLabel,
 			&s.FieldValue,
-			&s.IsActive,
-		); err != nil {
-			return nil, fmt.Errorf("getProductSpecifications 2 Query failed: %s", err)
+			&s.IsActive); err != nil {
+			return nil, fmt.Errorf("getProductSpecifications Query Scan failed: %s", err)
 		}
 		specs = append(specs, s)
 	}
@@ -347,10 +333,8 @@ func getMedias(id string) ([]*media, error) {
 			&m.MediaLinkURL,
 			&m.MediaLogoURL,
 			&m.MediaOrder,
-			&m.IsActive,
-		); err != nil {
-			log.Println("getProductMedia 2 Query failed: ", err)
-			return nil, err
+			&m.IsActive); err != nil {
+			return nil, fmt.Errorf("getProductMedia Query Scan failed: %s", err)
 		}
 		medias = append(medias, m)
 	}
@@ -366,8 +350,7 @@ func getNotes(id string) ([]*note, error) {
 
 	rows, err := db.Query("set nocount on; exec [spcProductNotesGet] ?", id)
 	if err != nil {
-		log.Println("getProductNotes Query failed: ", err)
-		return nil, err
+		return nil, fmt.Errorf("getProductNotes Query failed: %s", err)
 	}
 	defer rows.Close()
 
@@ -383,8 +366,7 @@ func getNotes(id string) ([]*note, error) {
 			&n.NoteText,
 			&n.NoteOrder,
 		); err != nil {
-			log.Println("getProductNotes 2 Query failed: ", err)
-			return nil, err
+			return nil, fmt.Errorf("getProductNotes Query Scan failed: %s", err)
 		}
 		notes = append(notes, n)
 	}
@@ -394,15 +376,13 @@ func getNotes(id string) ([]*note, error) {
 func getTags(id string) ([]*productTag, error) {
 	db, err := data.GetDB()
 	if db == nil || err != nil {
-		log.Println("error: ", err)
 		return nil, err
 	}
 	defer db.Close()
 
 	rows, err := db.Query("set nocount on; exec [spcProductTagsGet] ?", id)
 	if err != nil {
-		log.Println("error: ", err)
-		return nil, err
+		return nil, fmt.Errorf("spcProductTagsGet Query failed: %s", err)
 	}
 	defer rows.Close()
 
@@ -416,9 +396,8 @@ func getTags(id string) ([]*productTag, error) {
 			&t.ProductGUID,
 			&t.TagID,
 			&t.Tag,
-		); err != nil {
-			log.Println("Error: ", err)
-			return nil, err
+			&t.IsActive); err != nil {
+			return nil, fmt.Errorf("spcProductTagsGet Query Scan failed: %s", err)
 		}
 		tags = append(tags, t)
 	}
