@@ -11,7 +11,7 @@ import (
 
 // Product . . .
 type Product struct {
-	ProductGUID     string                  `json:"guid"`
+	GUID            string                  `json:"guid"`
 	SKU             string                  `json:"sku"`
 	ProductTypeID   int                     `json:"productTypeId"`
 	ProductType     string                  `json:"productType"`
@@ -41,64 +41,64 @@ type details struct {
 }
 
 type kit struct {
-	ProductSiteKitGUID string        `json:"productSiteKitId"`
-	ProductGUID        string        `json:"productGuid"`
-	KitItemName        string        `json:"kitItemName"`
-	KitItemLinkURL     ntypes.String `json:"kitItemLinkURL"`
-	KitItemIconURL     string        `json:"kitItemIconURL"`
-	ItemOrder          int           `json:"ItemOrder"`
+	GUID           string        `json:"guid"`
+	ProductGUID    string        `json:"productGuid"`
+	KitItemName    string        `json:"kitItemName"`
+	KitItemLinkURL ntypes.String `json:"kitItemLinkURL"`
+	KitItemIconURL string        `json:"kitItemIconURL"`
+	ItemOrder      int           `json:"ItemOrder"`
 }
 
 type media struct {
-	ProductSiteMediaGUID string        `json:"productSiteMediaId"`
-	ProductGUID          string        `json:"productGuid"`
-	MediaTypeID          int           `json:"mediaTypeId"`
-	MediaTitle           ntypes.String `json:"mediaTitle"`
-	MediaLinkURL         ntypes.String `json:"mediaLinkURL"`
-	MediaLogoURL         ntypes.String `json:"mediaLogoURL"`
-	MediaOrder           int           `json:"mediaOrder"`
-	IsActive             bool          `json:"isActive"`
+	GUID         string        `json:"guid"`
+	ProductGUID  string        `json:"productGuid"`
+	MediaTypeID  int           `json:"mediaTypeId"`
+	MediaTitle   ntypes.String `json:"mediaTitle"`
+	MediaLinkURL ntypes.String `json:"mediaLinkURL"`
+	MediaLogoURL ntypes.String `json:"mediaLogoURL"`
+	MediaOrder   int           `json:"mediaOrder"`
+	IsActive     bool          `json:"isActive"`
 }
 
 type note struct {
-	ProductSiteNoteGUID string `json:"productSiteNoteId"`
-	ProductGUID         string `json:"productGuid"`
-	NoteTypeID          int    `json:"noteTypeId"`
-	NoteText            string `json:"noteText"`
-	NoteOrder           int    `json:"noteOrder"`
+	GUID        string `json:"guid"`
+	ProductGUID string `json:"productGuid"`
+	NoteTypeID  int    `json:"noteTypeId"`
+	NoteText    string `json:"noteText"`
+	NoteOrder   int    `json:"noteOrder"`
 }
 
 type productSpecification struct {
-	ProductSiteSpecificationsGUID string `json:"id"`
-	ProductGUID                   string `json:"productGuid"`
-	SpecificationID               int    `json:"specificationId"`
-	FieldValue                    string `json:"specificationValue"`
-	IsActive                      bool   `json:"isActive"`
+	GUID            string `json:"guid"`
+	ProductGUID     string `json:"productGuid"`
+	SpecificationID int    `json:"specificationId"`
+	FieldValue      string `json:"specificationValue"`
+	IsActive        bool   `json:"isActive"`
 }
 
 type productVendor struct {
-	ProductSiteVendorGUID string `json:"id"`
-	ProductGUID           string `json:"productGuid"`
-	VendorID              int    `json:"vendorId"`
-	VendorName            string `json:"vendorName"`
-	VendorImageURL        string `json:"vendorImageURL"`
-	ProductVendorURL      string `json:"productVendorURL"`
+	GUID             string `json:"guid"`
+	ProductGUID      string `json:"productGuid"`
+	VendorID         int    `json:"vendorId"`
+	VendorName       string `json:"vendorName"`
+	VendorImageURL   string `json:"vendorImageURL"`
+	ProductVendorURL string `json:"productVendorURL"`
 }
 
 type relatedProduct struct {
-	ProductSiteRelatedGUID string `json:"id"`
-	ProductGUID            string `json:"productGuid"`
-	SKU                    string `json:"sku"`
-	ImageURL               string `json:"imageURL"`
-	OrderID                int    `json:"orderId"`
+	GUID        string `json:"guid"`
+	ProductGUID string `json:"productGuid"`
+	SKU         string `json:"sku"`
+	ImageURL    string `json:"imageURL"`
+	OrderID     int    `json:"orderId"`
 }
 
 type productTag struct {
-	ProductSiteTagGUID string `json:"id"`
-	ProductGUID        string `json:"productGuid"`
-	TagID              int    `json:"tagID"`
-	Tag                string `json:"tag"`
-	IsActive           bool   `json:"isActive"`
+	GUID        string `json:"guid"`
+	ProductGUID string `json:"productGuid"`
+	TagID       int    `json:"tagID"`
+	Tag         string `json:"tag"`
+	IsActive    bool   `json:"isActive"`
 }
 
 // GetByID . . .
@@ -127,7 +127,7 @@ func getFromDbAndCache(id string) (*Product, error) {
 	row := db.QueryRow("set nocount on; exec [spcProductGet] ?", id)
 	product := &Product{Details: &details{}}
 	if err = row.Scan(
-		&product.ProductGUID,
+		&product.GUID,
 		&product.SKU,
 		&product.ProductTypeID,
 		&product.ProductType,
@@ -197,7 +197,7 @@ func getKits(id string) ([]*kit, error) {
 		k := &kit{}
 
 		if err = rows.Scan(
-			&k.ProductSiteKitGUID,
+			&k.GUID,
 			&k.ProductGUID,
 			&k.KitItemName,
 			&k.KitItemLinkURL,
@@ -229,7 +229,7 @@ func getVendors(id string) ([]*productVendor, error) {
 		v := &productVendor{}
 
 		if err = rows.Scan(
-			&v.ProductSiteVendorGUID,
+			&v.GUID,
 			&v.ProductGUID,
 			&v.VendorID,
 			&v.VendorName,
@@ -262,7 +262,7 @@ func getRelatedProducts(id string) ([]*relatedProduct, error) {
 		r := &relatedProduct{}
 
 		if err = rows.Scan(
-			&r.ProductSiteRelatedGUID,
+			&r.GUID,
 			&r.ProductGUID,
 			&r.SKU,
 			&r.ImageURL,
@@ -295,7 +295,7 @@ func getSpecifications(id string) ([]*productSpecification, error) {
 		s := &productSpecification{}
 
 		if err = rows.Scan(
-			&s.ProductSiteSpecificationsGUID,
+			&s.GUID,
 			&s.ProductGUID,
 			&s.SpecificationID,
 			&s.FieldValue,
@@ -326,7 +326,7 @@ func getMedias(id string) ([]*media, error) {
 		m := &media{}
 
 		if err = rows.Scan(
-			&m.ProductSiteMediaGUID,
+			&m.GUID,
 			&m.ProductGUID,
 			&m.MediaTypeID,
 			&m.MediaTitle,
@@ -360,7 +360,7 @@ func getNotes(id string) ([]*note, error) {
 		n := &note{}
 
 		if err = rows.Scan(
-			&n.ProductSiteNoteGUID,
+			&n.GUID,
 			&n.ProductGUID,
 			&n.NoteTypeID,
 			&n.NoteText,
@@ -392,7 +392,7 @@ func getTags(id string) ([]*productTag, error) {
 		t := &productTag{}
 
 		if err = rows.Scan(
-			&t.ProductSiteTagGUID,
+			&t.GUID,
 			&t.ProductGUID,
 			&t.TagID,
 			&t.Tag,
