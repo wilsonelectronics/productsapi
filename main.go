@@ -1,34 +1,22 @@
 package main
 
 import (
-	"fmt"
 	"log"
 	"net/http"
 	"os"
-
-	"github.com/gorilla/mux"
-
-	"github.com/gorilla/handlers"
+	"products-api/controller"
 
 	_ "github.com/denisenkom/go-mssqldb"
+	"github.com/gorilla/handlers"
+	"github.com/gorilla/mux"
 )
 
-func setPort() string {
-	port := os.Getenv("PORT")
-	if port == "" {
-		return "$PORT not set"
-	}
-	return ":" + port
-}
-
 func main() {
-	fmt.Println("Backend API!!")
-
 	r := mux.NewRouter()
 
-	r.HandleFunc("/collections", Collections).Methods("GET")
-	r.HandleFunc("/collections/{collectionGuid}", CollectionProducts)
-	//r.HandleFunc("/product/{sku}", GetProduct)
+	r.HandleFunc("/tags", controller.GetTags)
+	r.HandleFunc("/tag/products/{tagId}", controller.GetTagProducts)
+	r.HandleFunc("/product/{guid}", controller.GetProduct)
 
 	methods := handlers.AllowedMethods([]string{"GET"})
 	headers := handlers.AllowedHeaders([]string{"Content-Type", "*"})
@@ -45,7 +33,11 @@ func main() {
 		"https://staging-wilsonpro-canada-api.herokuapp.com",
 		"https://wilsonpro-canada-staging.herokuapp.com/",
 	})
-	addr := setPort()
 
-	log.Fatal(http.ListenAndServe(addr, handlers.CORS(methods, origins, headers)(r)))
+	port := os.Getenv("PORT")
+	if port == "" {
+		log.Fatal("PORT was not defined.")
+	} else {
+		log.Fatal(http.ListenAndServe(":"+port, handlers.CORS(methods, origins, headers)(r)))
+	}
 }
