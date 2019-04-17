@@ -35,7 +35,9 @@ func main() {
 	})
 
 	port := os.Getenv("PORT")
-	if port != "" {
+	if port == "" {
+		log.Fatal("PORT was not defined.")
+	} else {
 		log.Fatal(http.ListenAndServe(":"+port, handlers.CORS(methods, origins, headers)(r)))
 	}
 }
