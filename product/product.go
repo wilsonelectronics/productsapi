@@ -46,7 +46,7 @@ type kit struct {
 	KitItemName    string        `json:"kitItemName"`
 	KitItemLinkURL ntypes.String `json:"kitItemLinkURL"`
 	KitItemIconURL string        `json:"kitItemIconURL"`
-	ItemOrder      int           `json:"ItemOrder"`
+	ItemOrder      int           `json:"itemOrder"`
 }
 
 type media struct {
