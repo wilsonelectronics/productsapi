@@ -147,25 +147,25 @@ func getFromDbAndCache(id string) (*Product, error) {
 		return nil, fmt.Errorf("spcProductGet Query Scan failed: %s", err)
 	}
 
-	if product.Kits, err = getKits(id); err != nil {
+	if product.Kits, err = getKits(product.GUID); err != nil {
 		return nil, err
 	}
-	if product.Vendors, err = getVendors(id); err != nil {
+	if product.Vendors, err = getVendors(product.GUID); err != nil {
 		return nil, err
 	}
-	if product.RelatedProducts, err = getRelatedProducts(id); err != nil {
+	if product.RelatedProducts, err = getRelatedProducts(product.GUID); err != nil {
 		return nil, err
 	}
-	if product.Specifications, err = getSpecifications(id); err != nil {
+	if product.Specifications, err = getSpecifications(product.GUID); err != nil {
 		return nil, err
 	}
-	if product.Medias, err = getMedias(id); err != nil {
+	if product.Medias, err = getMedias(product.GUID); err != nil {
 		return nil, err
 	}
-	if product.Notes, err = getNotes(id); err != nil {
+	if product.Notes, err = getNotes(product.GUID); err != nil {
 		return nil, err
 	}
-	if product.Tags, err = getTags(id); err != nil {
+	if product.Tags, err = getTags(product.GUID); err != nil {
 		return nil, err
 	}
 

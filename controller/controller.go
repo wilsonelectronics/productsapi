@@ -13,9 +13,9 @@ import (
 // GetProduct . . .
 func GetProduct(w http.ResponseWriter, r *http.Request) {
 	inputParams := strings.Split(r.URL.Path, "/")[2:]
-	productGUID := inputParams[0]
+	handle := inputParams[0]
 
-	product, err := product.GetByID(productGUID)
+	product, err := product.GetByID(handle)
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
 		fmt.Fprintln(w, err)

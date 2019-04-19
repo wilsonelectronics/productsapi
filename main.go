@@ -20,7 +20,7 @@ func main() {
 	r.HandleFunc("/categories", controller.GetCategories)
 	r.HandleFunc("/category/products/{categoryGuid}", controller.GetCategoryProducts)
 
-	r.HandleFunc("/product/{guid}", controller.GetProduct)
+	r.HandleFunc("/product/{handle}", controller.GetProduct)
 
 	methods := handlers.AllowedMethods([]string{"GET"})
 	headers := handlers.AllowedHeaders([]string{"Content-Type", "*"})
