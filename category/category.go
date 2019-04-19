@@ -12,12 +12,12 @@ import (
 
 // Category . . .
 type Category struct {
-	GUID        string `json:"guid"`
-	Name        string `json:"name"`
-	Handle      string `json:"handle"`
-	HeaderText  string `json:"headerText"`
-	Description string `json:"description"`
-	ImageURL    string `json:"imageUrl"`
+	GUID        string        `json:"guid"`
+	Name        string        `json:"name"`
+	Handle      string        `json:"handle"`
+	HeaderText  string        `json:"headerText"`
+	Description string        `json:"description"`
+	ImageURL    ntypes.String `json:"imageUrl"`
 }
 
 // Product . . .
