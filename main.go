@@ -16,6 +16,10 @@ func main() {
 
 	r.HandleFunc("/tags", controller.GetTags)
 	r.HandleFunc("/tag/products/{tagId}", controller.GetTagProducts)
+
+	r.HandleFunc("/categories", controller.GetCategories)
+	r.HandleFunc("/category/products/{categoryGuid}", controller.GetCategoryProducts)
+
 	r.HandleFunc("/product/{guid}", controller.GetProduct)
 
 	methods := handlers.AllowedMethods([]string{"GET"})
