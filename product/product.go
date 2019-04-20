@@ -90,7 +90,7 @@ type relatedProduct struct {
 	ProductGUID string `json:"productGuid"`
 	SKU         string `json:"sku"`
 	ImageURL    string `json:"imageURL"`
-	OrderID     int    `json:"orderId"`
+	Handle      string `json:"handle"`
 }
 
 type productTag struct {
@@ -266,7 +266,7 @@ func getRelatedProducts(id string) ([]*relatedProduct, error) {
 			&r.ProductGUID,
 			&r.SKU,
 			&r.ImageURL,
-			&r.OrderID,
+			&r.Handle,
 		); err != nil {
 			return nil, fmt.Errorf("spcProductRelatedGet Query Scan failed: %s", err)
 		}
