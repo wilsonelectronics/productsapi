@@ -47,6 +47,7 @@ type kit struct {
 	KitItemLinkURL ntypes.String `json:"kitItemLinkURL"`
 	KitItemIconURL string        `json:"kitItemIconURL"`
 	ItemOrder      int           `json:"itemOrder"`
+	SKU            string        `json:"sku"`
 }
 
 type media struct {
@@ -69,11 +70,12 @@ type note struct {
 }
 
 type productSpecification struct {
-	GUID            string `json:"guid"`
-	ProductGUID     string `json:"productGuid"`
-	SpecificationID int    `json:"specificationId"`
-	FieldValue      string `json:"specificationValue"`
-	IsActive        bool   `json:"isActive"`
+	GUID               string `json:"guid"`
+	ProductGUID        string `json:"productGuid"`
+	SpecificationID    int    `json:"specificationId"`
+	FieldValue         string `json:"specificationValue"`
+	IsActive           bool   `json:"isActive"`
+	SpecificationLabel string `json:"specificationLabel"`
 }
 
 type productVendor struct {
@@ -202,7 +204,8 @@ func getKits(id string) ([]*kit, error) {
 			&k.KitItemName,
 			&k.KitItemLinkURL,
 			&k.KitItemIconURL,
-			&k.ItemOrder); err != nil {
+			&k.ItemOrder,
+			&k.SKU); err != nil {
 			return nil, fmt.Errorf("spcProductKitGet Query Scan failed: %s", err)
 		}
 		kits = append(kits, k)
@@ -299,7 +302,8 @@ func getSpecifications(id string) ([]*productSpecification, error) {
 			&s.ProductGUID,
 			&s.SpecificationID,
 			&s.FieldValue,
-			&s.IsActive); err != nil {
+			&s.IsActive,
+			&s.SpecificationLabel); err != nil {
 			return nil, fmt.Errorf("getProductSpecifications Query Scan failed: %s", err)
 		}
 		specs = append(specs, s)
