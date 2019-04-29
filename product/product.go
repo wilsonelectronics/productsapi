@@ -103,15 +103,15 @@ type productTag struct {
 	IsActive    bool   `json:"isActive"`
 }
 
-// GetByID . . .
-func GetByID(id string) (*Product, error) {
-	bytes, err := cache.Retrieve(id)
+// GetByHandle . . .
+func GetByHandle(handle string) (*Product, error) {
+	bytes, err := cache.Retrieve(handle)
 	if err != nil {
 		return nil, err
 	}
 
 	if bytes == nil {
-		return getFromDbAndCache(id)
+		return getFromDbAndCache(handle)
 	}
 
 	product := &Product{}
@@ -119,14 +119,14 @@ func GetByID(id string) (*Product, error) {
 	return product, err
 }
 
-func getFromDbAndCache(id string) (*Product, error) {
+func getFromDbAndCache(handle string) (*Product, error) {
 	db, err := data.GetDB()
 	if db == nil || err != nil {
 		return nil, err
 	}
 	defer db.Close()
 
-	row := db.QueryRow("set nocount on; exec [spcProductGet] ?", id)
+	row := db.QueryRow("set nocount on; exec [spcProductGet] ?", handle)
 	product := &Product{Details: &details{}}
 	if err = row.Scan(
 		&product.GUID,
@@ -144,8 +144,7 @@ func getFromDbAndCache(id string) (*Product, error) {
 		&product.Details.Handle,
 		&product.Details.ModifiedTime,
 		&product.Details.IsActive,
-		&product.Details.IsDeleted,
-	); err != nil {
+		&product.Details.IsDeleted); err != nil {
 		return nil, fmt.Errorf("spcProductGet Query Scan failed: %s", err)
 	}
 
@@ -175,7 +174,7 @@ func getFromDbAndCache(id string) (*Product, error) {
 	if err != nil {
 		return nil, err
 	}
-	cache.Store(id, productJSON)
+	cache.Store(handle, productJSON)
 
 	return product, nil
 }

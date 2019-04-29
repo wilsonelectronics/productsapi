@@ -15,7 +15,7 @@ func GetProduct(w http.ResponseWriter, r *http.Request) {
 	inputParams := strings.Split(r.URL.Path, "/")[2:]
 	handle := inputParams[0]
 
-	product, err := product.GetByID(handle)
+	product, err := product.GetByHandle(handle)
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
 		fmt.Fprintln(w, err)
