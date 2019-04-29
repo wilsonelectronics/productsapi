@@ -41,7 +41,7 @@ func Store(key string, bytes []byte) error {
 	conn := pool.Get()
 	defer conn.Close()
 
-	secondsInDay := 86400
+	secondsInDay := 120
 	_, err := conn.Do("SETEX", key, secondsInDay, bytes)
 	return err
 }
