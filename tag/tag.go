@@ -29,7 +29,7 @@ type Product struct {
 	TitleTag         ntypes.String `json:"titleTag"`
 	BodyHTML         ntypes.String `json:"bodyHtml"`
 	Price            float64       `json:"price"`
-	ImageURL         string        `json:"imageUrl"`
+	ImageURL         string        `json:"imageURL"`
 	Handle           string        `json:"handle"`
 	ModifiedTime     string        `json:"modifiedTime"`
 	IsActive         bool          `json:"isActive"`

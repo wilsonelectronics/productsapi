@@ -17,7 +17,7 @@ type Category struct {
 	Handle      string        `json:"handle"`
 	HeaderText  string        `json:"headerText"`
 	Description string        `json:"description"`
-	ImageURL    ntypes.String `json:"imageUrl"`
+	ImageURL    ntypes.String `json:"imageURL"`
 }
 
 // Product . . .
@@ -32,7 +32,7 @@ type Product struct {
 	TitleTag         ntypes.String `json:"titleTag"`
 	BodyHTML         ntypes.String `json:"bodyHtml"`
 	Price            float64       `json:"price"`
-	ImageURL         string        `json:"imageUrl"`
+	ImageURL         string        `json:"imageURL"`
 	Handle           string        `json:"handle"`
 	ModifiedTime     string        `json:"modifiedTime"`
 	IsActive         bool          `json:"isActive"`
@@ -63,7 +63,7 @@ func GetAll() ([]*Category, error) {
 
 	categories := []*Category{}
 	if bytes == nil {
-		categories, err := getAllFromDbAndCache()
+		categories, err = getAllFromDbAndCache()
 		if err != nil {
 			return nil, err
 		}
