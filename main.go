@@ -1,6 +1,7 @@
 package main
 
 import (
+	"fmt"
 	"log"
 	"net/http"
 	"os"
@@ -26,6 +27,7 @@ func main() {
 	headers := handlers.AllowedHeaders([]string{"Content-Type", "*"})
 	origins := handlers.AllowedOrigins([]string{"https://localhost:3000",
 		"http://localhost:3000",
+		"http://localhost:3001",
 		"https://localhost:4000",
 		"http://localhost:4000",
 		"https://wilsonpro.ca",
@@ -42,6 +44,7 @@ func main() {
 	if port == "" {
 		log.Fatal("PORT was not defined.")
 	} else {
+		fmt.Println("Listening on port: ", port)
 		log.Fatal(http.ListenAndServe(":"+port, handlers.CORS(methods, origins, headers)(r)))
 	}
 }

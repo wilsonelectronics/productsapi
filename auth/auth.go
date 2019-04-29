@@ -51,6 +51,7 @@ func GetAccessToken() string {
 
 }
 
+// GetPemCert . . .
 func GetPemCert(token *jwt.Token) (string, error) {
 	cert := ""
 	resp, err := http.Get(os.Getenv("DOMAIN") + ".well-known/jwks.json")
