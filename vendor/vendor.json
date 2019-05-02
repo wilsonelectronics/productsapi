@@ -9,6 +9,12 @@
 			"revisionTime": "2018-08-30T21:53:43Z"
 		},
 		{
+			"checksumSHA1": "n2KWrxS+GQrPiFI/RQfKSj1nZTs=",
+			"path": "github.com/auth0/go-jwt-middleware",
+			"revision": "5493cabe49f7bfa6e2ec444a09d334d90cd4e2bd",
+			"revisionTime": "2017-04-25T17:11:59Z"
+		},
+		{
 			"checksumSHA1": "OcE/jbvEzkLl88hogGLj/RU68dc=",
 			"path": "github.com/denisenkom/go-mssqldb",
 			"revision": "1eb28afdf9b6e56cf673badd47545f844fe81103",
@@ -19,6 +25,12 @@
 			"path": "github.com/denisenkom/go-mssqldb/internal/cp",
 			"revision": "1eb28afdf9b6e56cf673badd47545f844fe81103",
 			"revisionTime": "2018-09-01T17:21:38Z"
+		},
+		{
+			"checksumSHA1": "blOHP3HPYU+IeV6yWCalQuuM+zE=",
+			"path": "github.com/dgrijalva/jwt-go",
+			"revision": "3af4c746e1c248ee8491a3e0c6f7a9cd831e95f8",
+			"revisionTime": "2018-09-21T17:23:15Z"
 		},
 		{
 			"checksumSHA1": "Wp97rIwFg54dNwuCeR9Vslaehtw=",

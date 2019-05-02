@@ -81,6 +81,7 @@ func GetTagProducts(w http.ResponseWriter, r *http.Request) {
 
 // GetCategories . . .
 func GetCategories(w http.ResponseWriter, r *http.Request) {
+	fmt.Println("Categories: ", r.Header)
 	categories, err := category.GetAll()
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
@@ -104,7 +105,7 @@ func GetCategories(w http.ResponseWriter, r *http.Request) {
 func GetCategoryProducts(w http.ResponseWriter, r *http.Request) {
 	inputParams := strings.Split(r.URL.Path, "/")[3:]
 	categoryID := inputParams[0]
-
+	fmt.Println("Category Products: ", r.Header)
 	products, err := category.GetProducts(categoryID)
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
