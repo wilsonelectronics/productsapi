@@ -7,12 +7,12 @@ import (
 	"os"
 	"products-api/controller"
 
-	_ "github.com/denisenkom/go-mssqldb"
 	"github.com/gorilla/handlers"
 	"github.com/gorilla/mux"
 )
 
-func main() {
+// NewRouter . . .
+func NewRouter() *mux.Router {
 	r := mux.NewRouter()
 
 	r.HandleFunc("/tags", controller.GetTags)
@@ -22,6 +22,11 @@ func main() {
 	r.HandleFunc("/category/products/{categoryGuid}", controller.GetCategoryProducts)
 
 	r.HandleFunc("/product/{handle}", controller.GetProduct)
+	return r
+}
+
+func main() {
+	r := NewRouter()
 
 	methods := handlers.AllowedMethods([]string{"GET"})
 	headers := handlers.AllowedHeaders([]string{"Content-Type", "*"})
