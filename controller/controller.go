@@ -4,9 +4,9 @@ import (
 	"encoding/json"
 	"fmt"
 	"net/http"
-	"products-api/category"
-	"products-api/product"
-	"products-api/tag"
+	"productsapi/category"
+	"productsapi/product"
+	"productsapi/tag"
 	"strings"
 )
 

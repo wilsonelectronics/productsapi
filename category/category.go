@@ -3,8 +3,8 @@ package category
 import (
 	"encoding/json"
 	"fmt"
-	"products-api/cache"
-	"products-api/data"
+	"productsapi/cache"
+	"productsapi/data"
 	"strings"
 
 	"github.com/piotrkowalczuk/ntypes"

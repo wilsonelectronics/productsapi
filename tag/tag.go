@@ -3,8 +3,8 @@ package tag
 import (
 	"encoding/json"
 	"fmt"
-	"products-api/cache"
-	"products-api/data"
+	"productsapi/cache"
+	"productsapi/data"
 
 	"github.com/piotrkowalczuk/ntypes"
 )

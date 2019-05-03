@@ -1,13 +1,22 @@
 package productsapi
 
 import (
-	"products-api/controller"
+	"productsapi/controller"
 
+	"github.com/gorilla/handlers"
 	"github.com/gorilla/mux"
 )
 
-// NewRouter . . .
-func NewRouter() *mux.Router {
+// NewBaseCORSOptions . . .
+func NewBaseCORSOptions() []handlers.CORSOption {
+	return []handlers.CORSOption{
+		handlers.AllowedMethods([]string{"GET"}),
+		handlers.AllowedHeaders([]string{"Content-Type", "*"}),
+		handlers.AllowedOrigins([]string{"http://localhost:3000"})}
+}
+
+// NewBaseRouter . . .
+func NewBaseRouter() *mux.Router {
 	r := mux.NewRouter()
 
 	r.HandleFunc("/tags", controller.GetTags)
