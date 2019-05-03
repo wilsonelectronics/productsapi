@@ -1,30 +1,39 @@
 package productsapi
 
 import (
+	"net/http"
 	"productsapi/controller"
 
 	"github.com/gorilla/handlers"
 	"github.com/gorilla/mux"
 )
 
-// NewBaseCORSOptions . . .
-func NewBaseCORSOptions() []handlers.CORSOption {
-	return []handlers.CORSOption{
-		handlers.AllowedMethods([]string{"GET"}),
-		handlers.AllowedHeaders([]string{"Content-Type", "*"}),
-		handlers.AllowedOrigins([]string{"http://localhost:3000"})}
+// HandleFuncModel . . .
+type HandleFuncModel struct {
+	path    string
+	handler func(http.ResponseWriter, *http.Request)
 }
 
-// NewBaseRouter . . .
-func NewBaseRouter() *mux.Router {
+// CORSOptions . . .
+func CORSOptions(moreOptions ...handlers.CORSOption) []handlers.CORSOption {
+	return append([]handlers.CORSOption{
+		handlers.AllowedMethods([]string{"GET"}),
+		handlers.AllowedHeaders([]string{"Content-Type", "*"}),
+		handlers.AllowedOrigins([]string{"http://localhost:3000"})},
+		moreOptions...)
+}
+
+// Router . . .
+func Router(moreRoutes ...HandleFuncModel) *mux.Router {
 	r := mux.NewRouter()
-
-	r.HandleFunc("/tags", controller.GetTags)
-	r.HandleFunc("/tag/products/{tagId}", controller.GetTagProducts)
-
-	r.HandleFunc("/categories", controller.GetCategories)
-	r.HandleFunc("/category/products/{categoryGuid}", controller.GetCategoryProducts)
-
-	r.HandleFunc("/product/{handle}", controller.GetProduct)
+	for _, v := range append([]HandleFuncModel{
+		HandleFuncModel{path: "/tags", handler: controller.GetTags},
+		HandleFuncModel{path: "/tag/products/{tagId}", handler: controller.GetTagProducts},
+		HandleFuncModel{path: "/categories", handler: controller.GetCategories},
+		HandleFuncModel{path: "/category/products/{categoryGuid}", handler: controller.GetCategoryProducts},
+		HandleFuncModel{path: "/product/{handle}", handler: controller.GetProduct}},
+		moreRoutes...) {
+		r.HandleFunc(v.path, v.handler)
+	}
 	return r
 }
