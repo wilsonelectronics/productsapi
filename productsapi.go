@@ -32,12 +32,15 @@ func createRouter(routes ...route) *mux.Router {
 
 // Handler . . .
 func Handler(opts ...*HandlerOptions) http.Handler {
+	var opt *HandlerOptions
 	if opts == nil {
-		return handlers.CORS()(createRouter())
+		opt = BaseHandlerOptions()
 	} else if len(opts) != 1 {
 		panic(fmt.Sprintf("Invalid number of HandlerOptions provided: %d", len(opts)))
+	} else {
+		opt = opts[0]
 	}
-	return handlers.CORS(opts[0].corsOptions...)(createRouter(opts[0].routes...))
+	return handlers.CORS(opt.corsOptions...)(createRouter(opt.routes...))
 }
 
 // AddRoute . . .
