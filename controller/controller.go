@@ -4,10 +4,11 @@ import (
 	"encoding/json"
 	"fmt"
 	"net/http"
-	"productsapi/category"
-	"productsapi/product"
-	"productsapi/tag"
 	"strings"
+
+	"github.com/wilsonelectronics/productsapi/category"
+	"github.com/wilsonelectronics/productsapi/product"
+	"github.com/wilsonelectronics/productsapi/tag"
 )
 
 // GetProduct . . .

@@ -3,8 +3,9 @@ package tag
 import (
 	"encoding/json"
 	"fmt"
-	"productsapi/cache"
-	"productsapi/data"
+
+	"github.com/wilsonelectronics/productsapi/cache"
+	"github.com/wilsonelectronics/productsapi/data"
 
 	"github.com/piotrkowalczuk/ntypes"
 )
