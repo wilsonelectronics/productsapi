@@ -1,1 +1,1 @@
-web: products-api
+web: productsapi
