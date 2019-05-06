@@ -5,7 +5,7 @@ import (
 	"log"
 	"net/http"
 
-	"productsapi/controller"
+	"github.com/wilsonelectronics/productsapi/controller"
 
 	"github.com/gorilla/handlers"
 	"github.com/gorilla/mux"

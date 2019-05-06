@@ -6,9 +6,9 @@ import (
 	"net/http"
 	"strings"
 
-	"productsapi/category"
-	"productsapi/product"
-	"productsapi/tag"
+	"github.com/wilsonelectronics/productsapi/category"
+	"github.com/wilsonelectronics/productsapi/product"
+	"github.com/wilsonelectronics/productsapi/tag"
 )
 
 // GetProduct . . .
