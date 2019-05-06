@@ -5,8 +5,8 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/wilsonelectronics/productsapi/cache"
-	"github.com/wilsonelectronics/productsapi/data"
+	"productsapi/cache"
+	"productsapi/data"
 
 	"github.com/piotrkowalczuk/ntypes"
 )
