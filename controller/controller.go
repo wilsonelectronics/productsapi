@@ -125,3 +125,11 @@ func GetCategoryProducts(w http.ResponseWriter, r *http.Request) {
 	w.WriteHeader(http.StatusOK)
 	w.Write(productsJSON)
 }
+
+// GetAccessToken . . .
+func GetAccessToken(w http.ResponseWriter, r *http.Request) {
+	if r.Method == "POST" {
+		//TODO func that will set and return an access token for the frontend
+	}
+	// TODO if the Method is GET it will return an access token
+}
