@@ -33,10 +33,10 @@
 			"revisionTime": "2018-09-21T17:23:15Z"
 		},
 		{
-			"checksumSHA1": "Wp97rIwFg54dNwuCeR9Vslaehtw=",
+			"checksumSHA1": "Y2MOwzNZfl4NRNDbLCZa6sgx7O0=",
 			"path": "github.com/golang/protobuf/proto",
-			"revision": "d3c38a4eb4970272b87a425ae00ccc4548e2f9bb",
-			"revisionTime": "2019-03-18T19:48:12Z"
+			"revision": "c823c79ea1570fb5ff454033735a8e68575d1d0f",
+			"revisionTime": "2019-02-05T22:20:52Z"
 		},
 		{
 			"checksumSHA1": "ym2VOnOPl3tJJdtmPtirwpHcYVM=",
@@ -57,10 +57,10 @@
 			"revisionTime": "2018-08-07T07:52:56Z"
 		},
 		{
-			"checksumSHA1": "FB/yNfVKN9oMIcujaaQKAiBYbMM=",
+			"checksumSHA1": "+l+DLNfRzbf9UH3QZGELuBKIw40=",
 			"path": "github.com/piotrkowalczuk/ntypes",
-			"revision": "15ae4dd32dbf658695648fdc52750c9c73223b71",
-			"revisionTime": "2018-12-05T12:46:20Z"
+			"revision": "9c32c36320545a3f06d3436d2323473678ebd272",
+			"revisionTime": "2018-10-15T11:28:39Z"
 		},
 		{
 			"checksumSHA1": "MCeXr2RNeiG1XG6V+er1OR0qyeo=",
@@ -69,5 +69,5 @@
 			"revisionTime": "2018-08-31T22:38:59Z"
 		}
 	],
-	"rootPath": "products-api"
+	"rootPath": "productsapi"
 }

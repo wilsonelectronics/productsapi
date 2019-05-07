@@ -3,8 +3,9 @@ package product
 import (
 	"encoding/json"
 	"fmt"
-	"products-api/cache"
-	"products-api/data"
+
+	"github.com/wilsonelectronics/productsapi/cache"
+	"github.com/wilsonelectronics/productsapi/data"
 
 	"github.com/piotrkowalczuk/ntypes"
 )
@@ -47,6 +48,7 @@ type kit struct {
 	KitItemLinkURL ntypes.String `json:"kitItemLinkURL"`
 	KitItemIconURL string        `json:"kitItemIconURL"`
 	ItemOrder      int           `json:"itemOrder"`
+	SKU            string        `json:"sku"`
 }
 
 type media struct {
@@ -69,11 +71,12 @@ type note struct {
 }
 
 type productSpecification struct {
-	GUID            string `json:"guid"`
-	ProductGUID     string `json:"productGuid"`
-	SpecificationID int    `json:"specificationId"`
-	FieldValue      string `json:"specificationValue"`
-	IsActive        bool   `json:"isActive"`
+	GUID               string `json:"guid"`
+	ProductGUID        string `json:"productGuid"`
+	SpecificationID    int    `json:"specificationId"`
+	FieldValue         string `json:"specificationValue"`
+	IsActive           bool   `json:"isActive"`
+	SpecificationLabel string `json:"specificationLabel"`
 }
 
 type productVendor struct {
@@ -101,15 +104,15 @@ type productTag struct {
 	IsActive    bool   `json:"isActive"`
 }
 
-// GetByID . . .
-func GetByID(id string) (*Product, error) {
-	bytes, err := cache.Retrieve(id)
+// GetByHandle . . .
+func GetByHandle(handle string) (*Product, error) {
+	bytes, err := cache.Retrieve(handle)
 	if err != nil {
 		return nil, err
 	}
 
 	if bytes == nil {
-		return getFromDbAndCache(id)
+		return getFromDbAndCache(handle)
 	}
 
 	product := &Product{}
@@ -117,14 +120,14 @@ func GetByID(id string) (*Product, error) {
 	return product, err
 }
 
-func getFromDbAndCache(id string) (*Product, error) {
+func getFromDbAndCache(handle string) (*Product, error) {
 	db, err := data.GetDB()
 	if db == nil || err != nil {
 		return nil, err
 	}
 	defer db.Close()
 
-	row := db.QueryRow("set nocount on; exec [spcProductGet] ?", id)
+	row := db.QueryRow("set nocount on; exec [spcProductGet] ?", handle)
 	product := &Product{Details: &details{}}
 	if err = row.Scan(
 		&product.GUID,
@@ -142,8 +145,7 @@ func getFromDbAndCache(id string) (*Product, error) {
 		&product.Details.Handle,
 		&product.Details.ModifiedTime,
 		&product.Details.IsActive,
-		&product.Details.IsDeleted,
-	); err != nil {
+		&product.Details.IsDeleted); err != nil {
 		return nil, fmt.Errorf("spcProductGet Query Scan failed: %s", err)
 	}
 
@@ -173,7 +175,7 @@ func getFromDbAndCache(id string) (*Product, error) {
 	if err != nil {
 		return nil, err
 	}
-	cache.Store(id, productJSON)
+	cache.Store(handle, productJSON)
 
 	return product, nil
 }
@@ -202,7 +204,8 @@ func getKits(id string) ([]*kit, error) {
 			&k.KitItemName,
 			&k.KitItemLinkURL,
 			&k.KitItemIconURL,
-			&k.ItemOrder); err != nil {
+			&k.ItemOrder,
+			&k.SKU); err != nil {
 			return nil, fmt.Errorf("spcProductKitGet Query Scan failed: %s", err)
 		}
 		kits = append(kits, k)
@@ -299,7 +302,8 @@ func getSpecifications(id string) ([]*productSpecification, error) {
 			&s.ProductGUID,
 			&s.SpecificationID,
 			&s.FieldValue,
-			&s.IsActive); err != nil {
+			&s.IsActive,
+			&s.SpecificationLabel); err != nil {
 			return nil, fmt.Errorf("getProductSpecifications Query Scan failed: %s", err)
 		}
 		specs = append(specs, s)
