@@ -6,6 +6,7 @@ import (
 	"net/http"
 	"strings"
 
+	"github.com/wilsonelectronics/productsapi/auth"
 	"github.com/wilsonelectronics/productsapi/category"
 	"github.com/wilsonelectronics/productsapi/product"
 	"github.com/wilsonelectronics/productsapi/tag"
@@ -128,8 +129,25 @@ func GetCategoryProducts(w http.ResponseWriter, r *http.Request) {
 
 // GetAccessToken . . .
 func GetAccessToken(w http.ResponseWriter, r *http.Request) {
+	inputParams := strings.Split(r.URL.Path, "/")[1:]
+	handle := inputParams[0]
 	if r.Method == "POST" {
-		//TODO func that will set and return an access token for the frontend
+		auth.SetTokenData(handle, r)
 	}
-	// TODO if the Method is GET it will return an access token
+	token, err := auth.GetTokenData(handle)
+	if err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		fmt.Fprintln(w, err)
+		return
+	}
+
+	accessToken, err := json.Marshal(token)
+	if err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		fmt.Fprintln(w, err)
+		return
+	}
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(http.StatusOK)
+	w.Write(accessToken)
 }
