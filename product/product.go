@@ -63,13 +63,13 @@ type media struct {
 }
 
 type note struct {
-	GUID             string `json:"guid"`
-	ProductGUID      string `json:"productGuid"`
-	NoteTypeID       int    `json:"noteTypeId"`
-	NoteText         string `json:"noteText"`
-	NoteOrder        int    `json:"noteOrder"`
-	NoteTitle        int    `json:"noteTitle"`
-	NoteIconImageURL int    `json:"noteIconImageUrl"`
+	GUID             string        `json:"guid"`
+	ProductGUID      string        `json:"productGuid"`
+	NoteTypeID       int           `json:"noteTypeId"`
+	NoteText         ntypes.String `json:"noteText"`
+	NoteOrder        int           `json:"noteOrder"`
+	NoteTitle        ntypes.String `json:"noteTitle"`
+	NoteIconImageURL ntypes.String `json:"noteIconImageUrl"`
 }
 
 type productSpecification struct {
