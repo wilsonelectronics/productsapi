@@ -63,11 +63,13 @@ type media struct {
 }
 
 type note struct {
-	GUID        string `json:"guid"`
-	ProductGUID string `json:"productGuid"`
-	NoteTypeID  int    `json:"noteTypeId"`
-	NoteText    string `json:"noteText"`
-	NoteOrder   int    `json:"noteOrder"`
+	GUID             string `json:"guid"`
+	ProductGUID      string `json:"productGuid"`
+	NoteTypeID       int    `json:"noteTypeId"`
+	NoteText         string `json:"noteText"`
+	NoteOrder        int    `json:"noteOrder"`
+	NoteTitle        int    `json:"noteTitle"`
+	NoteIconImageURL int    `json:"noteIconImageUrl"`
 }
 
 type productSpecification struct {
@@ -369,7 +371,8 @@ func getNotes(id string) ([]*note, error) {
 			&n.NoteTypeID,
 			&n.NoteText,
 			&n.NoteOrder,
-		); err != nil {
+			&n.NoteTitle,
+			&n.NoteIconImageURL); err != nil {
 			return nil, fmt.Errorf("getProductNotes Query Scan failed: %s", err)
 		}
 		notes = append(notes, n)
