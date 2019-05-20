@@ -129,6 +129,7 @@ func getAllFromDbAndCache() ([]*Category, error) {
 			&category.GUID,
 			&category.Name,
 			&category.Handle,
+			&category.HeaderText,
 			&category.Description,
 			&category.ImageURL); err != nil {
 			return nil, fmt.Errorf("Error in spcCategoryGet: %s", err)
