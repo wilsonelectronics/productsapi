@@ -16,7 +16,7 @@ type Category struct {
 	GUID        string        `json:"guid"`
 	Name        string        `json:"name"`
 	Handle      string        `json:"handle"`
-	HeaderText  string        `json:"headerText"`
+	HeaderText  ntypes.String `json:"headerText"`
 	Description string        `json:"description"`
 	ImageURL    ntypes.String `json:"imageURL"`
 }
