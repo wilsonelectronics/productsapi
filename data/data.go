@@ -9,11 +9,8 @@ import (
 )
 
 // GetDB makes connection to database
-func GetDB() (*sql.DB, error) {
-	dbAddr := os.Getenv("DBADDRESS")
-
-	db, err := sql.Open("mssql", dbAddr)
-	if err != nil {
+func GetDB() (db *sql.DB, err error) {
+	if db, err = sql.Open("mssql", os.Getenv("DBADDRESS")); err != nil {
 		return nil, err
 	}
 	return db, nil
