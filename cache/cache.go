@@ -52,8 +52,5 @@ func Flush() error {
 	defer conn.Close()
 
 	_, err := conn.Do("FLUSHALL")
-	if err != nil {
-		return err
-	}
-	return nil
+	return err
 }

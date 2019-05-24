@@ -1,10 +1,10 @@
 package controller
 
 import (
-	"productsapi/cache"
 	"encoding/json"
 	"fmt"
 	"net/http"
+	"productsapi/cache"
 	"strings"
 
 	"github.com/wilsonelectronics/productsapi/category"
