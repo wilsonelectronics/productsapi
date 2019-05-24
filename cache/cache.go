@@ -45,3 +45,12 @@ func Store(key string, bytes []byte) error {
 	_, err := conn.Do("SETEX", key, secondsInDay, bytes)
 	return err
 }
+
+// Flush . . .
+func Flush() error {
+	conn := pool.Get()
+	defer conn.Close()
+
+	_, err := conn.Do("FLUSHALL")
+	return err
+}

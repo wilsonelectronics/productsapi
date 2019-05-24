@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"net/http"
+	"productsapi/cache"
 	"strings"
 
 	"github.com/wilsonelectronics/productsapi/auth"
