@@ -2,14 +2,10 @@ package auth
 
 import (
 	"encoding/json"
-	"errors"
-	"fmt"
 	"io/ioutil"
 	"net/http"
-	"os"
-	"strings"
 
-	"github.com/dgrijalva/jwt-go"
+	"github.com/wilsonelectronics/productsapi/cache"
 )
 
 // Jwks : Slice of json web keys for validating JWT sent with requests
@@ -27,57 +23,37 @@ type JSONWebKeys struct {
 	X5c []string `json:"x5c"`
 }
 
-// GetAccessToken is inteaded to return a hash for the frontend sites to use as a Bearer Token
-func GetAccessToken() string {
-
-	url := "https://wilson-portal.auth0.com/oauth/token"
-
-	payload := strings.NewReader("{\"client_id\":\"RqQGt7ncz2hP8SlsMcyghUnXrzXbfM81\",\"client_secret\":\"MhdbhSrjpK7Mqnz2O8freMsFyakusGME8fdQ9UULdDQq3Zo8b-vD1EQj9rfSelcN\",\"audience\":\"https://product.wilsonelectronics.com\",\"grant_type\":\"client_credentials\"}")
-
-	req, _ := http.NewRequest("POST", url, payload)
-
-	req.Header.Add("content-type", "application/json")
-
-	res, err := http.DefaultClient.Do(req)
-	if err != nil {
-		fmt.Println(err)
-	}
-	defer res.Body.Close()
-	body, _ := ioutil.ReadAll(res.Body)
-
-	fmt.Println(res)
-
-	return string(body)
-
+// TokenData . . .
+type TokenData struct {
+	TokenType string `json:"tokenType"`
+	Token     string `json:"token"`
+	Scope     string `json:"scope"`
+	ExpiresAt string `json:"expiresAt"`
+	CreateOn  string `json:"createOn"`
 }
 
-// GetPemCert . . .
-func GetPemCert(token *jwt.Token) (string, error) {
-	cert := ""
-	resp, err := http.Get(os.Getenv("DOMAIN") + ".well-known/jwks.json")
-
+// GetTokenData is inteaded to return a token object for the frontend sites to use as a Bearer Token
+func GetTokenData(handle string) (*TokenData, error) {
+	bytes, err := cache.Retrieve(handle)
 	if err != nil {
-		return cert, err
+		return nil, err
 	}
-	defer resp.Body.Close()
 
-	var jwks = Jwks{}
-	err = json.NewDecoder(resp.Body).Decode(&jwks)
+	if bytes == nil {
+		return nil, err
+	}
 
+	token := &TokenData{}
+	err = json.Unmarshal(bytes, token)
+	return token, err
+}
+
+//SetTokenData will set a new token if one need to be set.
+func SetTokenData(handle string, r *http.Request) error {
+	body, err := ioutil.ReadAll(r.Body)
 	if err != nil {
-		return cert, err
+		return err
 	}
-
-	x5c := jwks.Keys[0].X5c
-	for k, v := range x5c {
-		if token.Header["kid"] == jwks.Keys[k].Kid {
-			cert = "-----BEGIN CERTIFICATE-----\n" + v + "\n-----END CERTIFICATE-----"
-		}
-	}
-
-	if cert == "" {
-		err := errors.New("unable to find appropriate key")
-		return cert, err
-	}
-	return cert, nil
+	err = cache.Store(handle, body)
+	return err
 }
