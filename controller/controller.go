@@ -4,9 +4,10 @@ import (
 	"encoding/json"
 	"fmt"
 	"net/http"
-	"productsapi/cache"
 	"strings"
 
+	"github.com/wilsonelectronics/productsapi/auth"
+	"github.com/wilsonelectronics/productsapi/cache"
 	"github.com/wilsonelectronics/productsapi/category"
 	"github.com/wilsonelectronics/productsapi/product"
 	"github.com/wilsonelectronics/productsapi/tag"
@@ -126,6 +127,32 @@ func GetCategoryProducts(w http.ResponseWriter, r *http.Request) {
 	w.Write(productsJSON)
 }
 
+// GetAccessToken . . .
+func GetAccessToken(w http.ResponseWriter, r *http.Request) {
+	inputParams := strings.Split(r.URL.Path, "/")[1:]
+	handle := inputParams[0]
+	if r.Method == "POST" {
+		auth.SetTokenData(handle, r)
+	}
+	token, err := auth.GetTokenData(handle)
+	if err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		fmt.Fprintln(w, err)
+		return
+	}
+
+	accessToken, err := json.Marshal(token)
+	if err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		fmt.Fprintln(w, err)
+		return
+	}
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(http.StatusOK)
+	w.Write(accessToken)
+}
+
+// FlushRedisDB . . .
 func FlushRedisDB() {
 	cache.Flush()
 }
