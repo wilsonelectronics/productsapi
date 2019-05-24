@@ -1,6 +1,7 @@
 package controller
 
 import (
+	"productsapi/cache"
 	"encoding/json"
 	"fmt"
 	"net/http"
@@ -123,4 +124,8 @@ func GetCategoryProducts(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusOK)
 	w.Write(productsJSON)
+}
+
+func FlushRedisDB() {
+	cache.Flush()
 }
