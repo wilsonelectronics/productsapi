@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"net/http"
+	"productsapi/cache"
 	"strings"
 
 	"github.com/wilsonelectronics/productsapi/category"
@@ -123,4 +124,8 @@ func GetCategoryProducts(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusOK)
 	w.Write(productsJSON)
+}
+
+func FlushRedisDB() {
+	cache.Flush()
 }
