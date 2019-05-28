@@ -153,6 +153,6 @@ func GetAccessToken(w http.ResponseWriter, r *http.Request) {
 }
 
 // FlushRedisDB . . .
-func FlushRedisDB() {
+func FlushRedisDB(w http.ResponseWriter, r *http.Request) {
 	cache.Flush()
 }
