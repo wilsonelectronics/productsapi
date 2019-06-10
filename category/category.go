@@ -111,7 +111,7 @@ func GetProducts(categoryGUID string) ([]*Product, error) {
 
 func getAllFromDbAndCache() ([]*Category, error) {
 	db, err := data.GetDB()
-	if db == nil || err != nil {
+	if err != nil {
 		return nil, err
 	}
 	defer db.Close()
@@ -142,14 +142,16 @@ func getAllFromDbAndCache() ([]*Category, error) {
 
 func getProductsFromDb(categoryGUID string) ([]*Product, error) {
 	db, err := data.GetDB()
-	if db == nil || err != nil {
+	if err != nil {
 		return nil, err
 	}
+	defer db.Close()
 
 	rows, err := db.Query("set nocount on; exec [spcCategoryProductsGet] ?", categoryGUID)
 	if err != nil {
 		return nil, err
 	}
+	defer rows.Close()
 
 	products := []*Product{}
 	for rows.Next() {
@@ -174,10 +176,8 @@ func getProductsFromDb(categoryGUID string) ([]*Product, error) {
 		}
 		products = append(products, product)
 	}
-	rows.Close()
-	db.Close()
 
-	err = getAndSetTagsForProducts(products)
+	// err = getAndSetTagsForProducts(products)
 	return products, err
 }
 
@@ -188,15 +188,16 @@ func getAndSetTagsForProducts(products []*Product) error {
 	}
 
 	db, err := data.GetDB()
-	if db == nil || err != nil {
+	if err != nil {
 		return err
 	}
-
 	defer db.Close()
+
 	rows, err := db.Query("set nocount on; exec [spcProductTagsGet] ?", strings.Join(productGUIDs, ","))
 	if err != nil {
 		return fmt.Errorf("Error in spcProductTagsGet: %s", err)
 	}
+	defer rows.Close()
 
 	productTags := []*productTag{}
 	for rows.Next() {
