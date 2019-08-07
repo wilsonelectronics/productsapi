@@ -4,6 +4,8 @@ import (
 	"encoding/json"
 	"fmt"
 	"net/http"
+	"os"
+	"productsapi/blog"
 	"strings"
 
 	"github.com/wilsonelectronics/productsapi/auth"
@@ -155,4 +157,48 @@ func GetAccessToken(w http.ResponseWriter, r *http.Request) {
 // FlushRedisDB . . .
 func FlushRedisDB(w http.ResponseWriter, r *http.Request) {
 	cache.Flush()
+}
+
+// GetBlogPosts . . .
+func GetBlogPosts(w http.ResponseWriter, r *http.Request) {
+	client := blog.NewClient("https://api.hubapi.com/content/api/v2/blog-posts?hapikey=", os.Getenv("hubSpotAPI"))
+
+	response, err := client.GetAllPosts()
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	w.Header().Set("Content-Type", "application/json")
+	w.Write(response)
+}
+
+// GetPostWithSlug . . .
+func GetPostWithSlug(w http.ResponseWriter, r *http.Request) {
+	client := blog.NewClient("https://api.hubapi.com/content/api/v2/blog-posts?hapikey=", os.Getenv("hubSpotAPI"))
+
+	slug := r.FormValue("slug")
+
+	post, err := client.GetPost(slug)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	w.Header().Set("Content-Type", "application/json")
+	w.Write(post)
+}
+
+// GetPostTopics . . .
+func GetPostTopics(w http.ResponseWriter, r *http.Request) {
+	client := blog.NewClient("https://api.hubapi.com/blogs/v3/topics/search?hapikey=", os.Getenv("hubSpotAPI"))
+
+	topics, err := client.GetTopics()
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	w.Header().Set("Content-Type", "application/json")
+	w.Write(topics)
 }
