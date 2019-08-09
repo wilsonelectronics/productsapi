@@ -6,7 +6,6 @@ import (
 	"net/http"
 	"os"
 	"productsapi/blog"
-	"strconv"
 	"strings"
 
 	"github.com/wilsonelectronics/productsapi/auth"
@@ -165,93 +164,57 @@ func FlushRedisDB(w http.ResponseWriter, r *http.Request) {
 	cache.Flush()
 }
 
-// GetRecentBlogPosts . . .
-func GetRecentBlogPosts(w http.ResponseWriter, r *http.Request) {
+// GetBlogPostsAndTopics . . .
+func GetBlogPostsAndTopics(w http.ResponseWriter, r *http.Request) {
 	client := blog.NewClient(baseURL, os.Getenv("hubSpotAPI"))
 
-	response, err := client.GetRecentPosts()
+	response, err := client.GetSliderTopicsRecentPosts()
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	res, err := json.Marshal(response)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
 
 	w.Header().Set("Content-Type", "application/json")
-	w.Write(response)
-}
-
-// GetPostWithSlug . . .
-func GetPostWithSlug(w http.ResponseWriter, r *http.Request) {
-	client := blog.NewClient(baseURL, os.Getenv("hubSpotAPI"))
-
-	slug := r.FormValue("slug")
-
-	post, err := client.GetPost(slug)
-	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
-		return
-	}
-
-	w.Header().Set("Content-Type", "application/json")
-	w.Write(post)
-}
-
-// GetPostTopics . . .
-func GetPostTopics(w http.ResponseWriter, r *http.Request) {
-	client := blog.NewClient("https://api.hubapi.com/blogs/v3/topics/search?hapikey=", os.Getenv("hubSpotAPI"))
-
-	topics, err := client.GetTopics()
-	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
-		return
-	}
-
-	w.Header().Set("Content-Type", "application/json")
-	w.Write(topics)
+	w.Write(res)
 }
 
 // GetTopicPosts . . .
 func GetTopicPosts(w http.ResponseWriter, r *http.Request) {
-	client := blog.NewClient("https://api.hubapi.com/blogs/v3/topics/", os.Getenv("hubSpotAPI"))
+	client := blog.NewClient(baseURL, os.Getenv("hubSpotAPI"))
 
-	inputParams := strings.Split(r.URL.Path, "/")[3:]
-	topic := inputParams[0]
+	//inputParams := strings.Split(r.URL.Path, "/")[3:]
+	topic := r.FormValue("slug")
 
 	topicPosts, err := client.GetPostsWithTopicID(topic)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 	}
 
+	tp, _ := json.Marshal(topicPosts)
 	w.Header().Set("Content-Type", "application/json")
-	w.Write(topicPosts)
+	w.Write(tp)
 }
 
-// GetBlogRss . . .
-func GetBlogRss(w http.ResponseWriter, r *http.Request) {
+// GetPost . . .
+func GetPost(w http.ResponseWriter, r *http.Request) {
 	client := blog.NewClient(baseURL, os.Getenv("hubSpotAPI"))
 
-	rss, err := client.GetRSS()
+	postSlug := r.FormValue("slug")
+
+	postData, err := client.GetPostData(postSlug)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
 
+	p, _ := json.Marshal(postData)
 	w.Header().Set("Content-Type", "application/json")
-	w.Write(rss)
-}
+	w.Write(p)
 
-// LoadMorePosts . . .
-func LoadMorePosts(w http.ResponseWriter, r *http.Request) {
-	client := blog.NewClient(baseURL, os.Getenv("hubSpotAPI"))
-
-	inputParams := strings.Split(r.URL.Path, "/")[3:]
-	offset, _ := strconv.Atoi(inputParams[0])
-
-	morePosts, err := client.GetMorePosts(offset)
-	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
-		return
-	}
-
-	w.Header().Set("Content-Type", "application/json")
-	w.Write(morePosts)
 }
