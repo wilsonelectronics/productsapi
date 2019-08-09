@@ -5,11 +5,10 @@ import (
 	"fmt"
 	"net/http"
 	"os"
-	"productsapi/blog"
 	"strings"
 
 	"github.com/wilsonelectronics/productsapi/auth"
-	// "github.com/wilsonelectronics/productsapi/blog"
+	"github.com/wilsonelectronics/productsapi/blog"
 	"github.com/wilsonelectronics/productsapi/cache"
 	"github.com/wilsonelectronics/productsapi/category"
 	"github.com/wilsonelectronics/productsapi/product"
