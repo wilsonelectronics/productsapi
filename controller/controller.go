@@ -4,13 +4,20 @@ import (
 	"encoding/json"
 	"fmt"
 	"net/http"
+	"os"
+	"productsapi/blog"
 	"strings"
 
 	"github.com/wilsonelectronics/productsapi/auth"
+	// "github.com/wilsonelectronics/productsapi/blog"
 	"github.com/wilsonelectronics/productsapi/cache"
 	"github.com/wilsonelectronics/productsapi/category"
 	"github.com/wilsonelectronics/productsapi/product"
 	"github.com/wilsonelectronics/productsapi/tag"
+)
+
+const (
+	baseURL = "https://api.hubapi.com/content/api/v2/blog-posts?hapikey="
 )
 
 // GetProduct . . .
@@ -155,4 +162,59 @@ func GetAccessToken(w http.ResponseWriter, r *http.Request) {
 // FlushRedisDB . . .
 func FlushRedisDB(w http.ResponseWriter, r *http.Request) {
 	cache.Flush()
+}
+
+// GetBlogPostsAndTopics . . .
+func GetBlogPostsAndTopics(w http.ResponseWriter, r *http.Request) {
+	client := blog.NewClient(baseURL, os.Getenv("hubSpotAPI"))
+
+	response, err := client.GetSliderTopicsRecentPosts()
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	res, err := json.Marshal(response)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	w.Header().Set("Content-Type", "application/json")
+	w.Write(res)
+}
+
+// GetTopicPosts . . .
+func GetTopicPosts(w http.ResponseWriter, r *http.Request) {
+	client := blog.NewClient(baseURL, os.Getenv("hubSpotAPI"))
+
+	//inputParams := strings.Split(r.URL.Path, "/")[3:]
+	topic := r.FormValue("slug")
+
+	topicPosts, err := client.GetPostsWithTopicID(topic)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+	}
+
+	tp, _ := json.Marshal(topicPosts)
+	w.Header().Set("Content-Type", "application/json")
+	w.Write(tp)
+}
+
+// GetPost . . .
+func GetPost(w http.ResponseWriter, r *http.Request) {
+	client := blog.NewClient(baseURL, os.Getenv("hubSpotAPI"))
+
+	postSlug := r.FormValue("slug")
+
+	postData, err := client.GetPostData(postSlug)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	p, _ := json.Marshal(postData)
+	w.Header().Set("Content-Type", "application/json")
+	w.Write(p)
+
 }
