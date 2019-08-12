@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"net/http"
 	"os"
+	"strconv"
 	"strings"
 
 	"github.com/wilsonelectronics/productsapi/auth"
@@ -216,4 +217,29 @@ func GetPost(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 	w.Write(p)
 
+}
+
+// GetMorePosts . . .
+func GetMorePosts(w http.ResponseWriter, r *http.Request) {
+	offset, err := strconv.Atoi(r.FormValue("offset"))
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusBadRequest)
+	}
+
+	client := blog.NewClient(baseURL, os.Getenv("hubSpotAPI"))
+
+	posts, err := client.LoadMorePosts(offset)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	p, err := json.Marshal(posts)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	w.Header().Set("Content-Type", "application/json")
+	w.Write(p)
 }

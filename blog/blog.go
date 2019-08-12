@@ -32,10 +32,14 @@ type TopicPostsResponseModel struct {
 	Posts []*postData `json:"posts"`
 }
 
-// PostTopicsResponseModel . . .
-type PostTopicsResponseModel struct {
-	Topics []*topicData `json:"topics"`
-	Post   *postData    `json:"post"`
+// LoadMorePostsResponseModel . . .
+type LoadMorePostsResponseModel struct {
+	Posts postResponseModel `json:"posts"`
+}
+
+// PostResponseModel . . .
+type PostResponseModel struct {
+	Post *postData `json:"post"`
 }
 
 // singlePostResponseModel . . .
@@ -137,7 +141,7 @@ func (c *Client) GetSliderTopicsRecentPosts() (*SliderTopicsRecentPosts, error) 
 }
 
 // GetPostData . . .
-func (c *Client) GetPostData(postSlug string) (*PostTopicsResponseModel, error) {
+func (c *Client) GetPostData(postSlug string) (*PostResponseModel, error) {
 	post, err := c.getPost(postSlug)
 	if err != nil {
 		return nil, err
@@ -150,11 +154,32 @@ func (c *Client) GetPostData(postSlug string) (*PostTopicsResponseModel, error) 
 
 	fmt.Println(data)
 
-	singlePost := &PostTopicsResponseModel{
-		Topics: nil,
-		Post:   data.Objects[0],
+	singlePost := &PostResponseModel{
+		Post: data.Objects[0],
 	}
 	return singlePost, err
+}
+
+// LoadMorePosts . . .
+func (c *Client) LoadMorePosts(offset int) (*LoadMorePostsResponseModel, error) {
+	posts, err := c.doRequest(requestStruct{
+		URL:    fmt.Sprintf("%s%s&limit=3&offset=%d&archived=false&property=id&property=html_title&property=post_summary&property=topic_ids&property=slug&property=featured_image&content_group_id=3708593652&state=published", c.baseURL, c.apiKey, offset),
+		Method: http.MethodGet,
+	})
+	if err != nil {
+		return nil, err
+	}
+
+	var pData postResponseModel
+	if err = json.Unmarshal(posts, &pData); err != nil {
+		return nil, err
+	}
+
+	morePosts := &LoadMorePostsResponseModel{
+		Posts: pData,
+	}
+
+	return morePosts, err
 }
 
 func (c *Client) getTopic(slugID int) ([]byte, error) {
