@@ -224,6 +224,7 @@ func GetMorePosts(w http.ResponseWriter, r *http.Request) {
 	offset, err := strconv.Atoi(r.FormValue("offset"))
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusBadRequest)
+		return
 	}
 
 	client := blog.NewClient(baseURL, os.Getenv("hubSpotAPI"))
