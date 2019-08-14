@@ -37,9 +37,11 @@ type LoadMorePostsResponseModel struct {
 	Posts postResponseModel `json:"posts"`
 }
 
-// PostResponseModel . . .
-type PostResponseModel struct {
-	Post *postData `json:"post"`
+// PageResponseModel . . .
+type PageResponseModel struct {
+	Topics []*topicData `json:"topics"`
+	Post   *postData    `json:"post"`
+	Posts  []*postData  `json:"featuredPosts"`
 }
 
 // singlePostResponseModel . . .
@@ -141,7 +143,7 @@ func (c *Client) GetSliderTopicsRecentPosts() (*SliderTopicsRecentPosts, error) 
 }
 
 // GetPostData . . .
-func (c *Client) GetPostData(postSlug string) (*PostResponseModel, error) {
+func (c *Client) GetPostData(postSlug string) (*PageResponseModel, error) {
 	post, err := c.getPost(postSlug)
 	if err != nil {
 		return nil, err
@@ -152,11 +154,31 @@ func (c *Client) GetPostData(postSlug string) (*PostResponseModel, error) {
 		return nil, err
 	}
 
-	fmt.Println(data)
-
-	singlePost := &PostResponseModel{
-		Post: data.Objects[0],
+	topics, err := c.getTopics()
+	if err != nil {
+		return nil, err
 	}
+
+	var tdata topicResponseModel
+	if err = json.Unmarshal(topics, &tdata); err != nil {
+		return nil, err
+	}
+
+	posts, err := c.getFeaturedPosts()
+	if err != nil {
+		return nil, err
+	}
+
+	var pdata postResponseModel
+	if err = json.Unmarshal(posts, &pdata); err != nil {
+		return nil, err
+	}
+
+	singlePost := &PageResponseModel{
+		Post:   data.Objects[0],
+		Topics: tdata.Objects,
+		Posts:  pdata.Objects}
+
 	return singlePost, err
 }
 
@@ -164,8 +186,7 @@ func (c *Client) GetPostData(postSlug string) (*PostResponseModel, error) {
 func (c *Client) LoadMorePosts(offset int) (*LoadMorePostsResponseModel, error) {
 	posts, err := c.doRequest(requestStruct{
 		URL:    fmt.Sprintf("%s%s&limit=3&offset=%d&archived=false&property=id&property=html_title&property=post_summary&property=topic_ids&property=slug&property=featured_image&content_group_id=3708593652&state=published", c.baseURL, c.apiKey, offset),
-		Method: http.MethodGet,
-	})
+		Method: http.MethodGet})
 	if err != nil {
 		return nil, err
 	}
@@ -185,22 +206,19 @@ func (c *Client) LoadMorePosts(offset int) (*LoadMorePostsResponseModel, error) 
 func (c *Client) getTopic(slugID int) ([]byte, error) {
 	return c.doRequest(requestStruct{
 		URL:    fmt.Sprintf("https://api.hubapi.com/blogs/v3/topics/%d?hapikey=%s&property=slug", slugID, c.apiKey),
-		Method: http.MethodGet,
-	})
+		Method: http.MethodGet})
 }
 
 func (c *Client) getTopics() ([]byte, error) {
 	return c.doRequest(requestStruct{
 		URL:    fmt.Sprintf("https://api.hubapi.com/blogs/v3/topics?hapikey=%s&property=id&property=name&property=slug", c.apiKey),
-		Method: http.MethodGet,
-	})
+		Method: http.MethodGet})
 }
 
 func (c *Client) getPost(slug string) ([]byte, error) {
 	return c.doRequest(requestStruct{
 		URL:    fmt.Sprintf("%s%s&slug=%s&archived=false&property=featured_image&property=name&property=slug&property=html_title&property=meta_description&property=publish_date&property=post_body&property=blog_author&state=published&property=topic_ids", c.baseURL, c.apiKey, slug),
-		Method: http.MethodGet,
-	})
+		Method: http.MethodGet})
 }
 
 // GetPostsWithTopicID . . .
@@ -264,8 +282,7 @@ func (c *Client) GetPostsWithTopicID(topicSlugString string) (*TopicPostsRespons
 
 	posts, err := c.doRequest(requestStruct{
 		URL:    fmt.Sprintf("%s%s&limit=1000&property=id&property=name&property=topic_ids&property=featured_image&property=publish_date&property=slug&content_group_id=3708593652&state=published", c.baseURL, c.apiKey),
-		Method: http.MethodGet,
-	})
+		Method: http.MethodGet})
 	if err != nil {
 		return nil, err
 	}
@@ -296,8 +313,13 @@ func (c *Client) GetPostsWithTopicID(topicSlugString string) (*TopicPostsRespons
 func (c *Client) getPosts() ([]byte, error) {
 	return c.doRequest(requestStruct{
 		URL:    fmt.Sprintf("%s%s&limit=5&archived=false&property=id&property=html_title&property=post_summary&property=publish_date&property=topic_ids&property=slug&property=featured_image&content_group_id=3708593652&state=published", c.baseURL, c.apiKey),
-		Method: http.MethodGet,
-	})
+		Method: http.MethodGet})
+}
+
+func (c *Client) getFeaturedPosts() ([]byte, error) {
+	return c.doRequest(requestStruct{
+		URL:    fmt.Sprintf("%s%s&limit=3&archived=false&property=id&property=html_title&property=slug&property=featured_image&content_group_id=3708593652&state=published", c.baseURL, c.apiKey),
+		Method: http.MethodGet})
 }
 
 func (c *Client) doRequest(r requestStruct) ([]byte, error) {
