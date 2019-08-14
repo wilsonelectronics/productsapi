@@ -78,11 +78,6 @@ type topicData struct {
 	Slug string `json:"slug"`
 }
 
-type postTopic struct {
-	ID   int    `json:"id"`
-	Name string `json:"name"`
-}
-
 type postResponseModel struct {
 	Limit      int         `json:"limit"`
 	Objects    []*postData `json:"objects"`
@@ -118,7 +113,7 @@ func NewClient(baseURL, apiKey string) *Client {
 
 // GetSliderTopicsRecentPosts . . .
 func (c *Client) GetSliderTopicsRecentPosts() (*SliderTopicsRecentPosts, error) {
-	
+
 	posts, err := c.getPosts()
 	if err != nil {
 		return nil, err
