@@ -252,6 +252,7 @@ func (c *Client) GetPostsWithTopicID(topicSlugString string) (*TopicPostsRespons
 		case "passive das":
 			return 5208231936
 		case "event":
+			return 5208232018
 		case "events":
 			return 5208232018
 		case "cellphone signal booster":
