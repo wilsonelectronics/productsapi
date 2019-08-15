@@ -232,6 +232,7 @@ func (c *Client) GetPostsWithTopicID(topicSlugString string) (*TopicPostsRespons
 	slugID = func() int {
 		switch ts {
 		case "resellers":
+			return 4463036677
 		case "dealers":
 			return 4463036677
 		case "passive das vs active das":
@@ -254,6 +255,7 @@ func (c *Client) GetPostsWithTopicID(topicSlugString string) (*TopicPostsRespons
 		case "events":
 			return 5208232018
 		case "cellphone signal booster":
+			return 5232260383
 		case "cellphone signal boosters":
 			return 5232260383
 		case "4g signal booster":
