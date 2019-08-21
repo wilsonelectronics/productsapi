@@ -39,6 +39,7 @@ type Product struct {
 	IsActive         bool          `json:"isActive"`
 	IsDeleted        bool          `json:"isDeleted"`
 	Tags             []*tag        `json:"tags"`
+	OrderID          int           `json:"orderId"`
 }
 
 type productTag struct {
@@ -140,7 +141,7 @@ func getAllFromDbAndCache() ([]*Category, error) {
 	return categories, nil
 }
 
-func getProductsFromDb(categoryGUID string) ([]*Product, error) {
+func getProductsFromDb(categoryGUID string) (products []*Product, err error) {
 	db, err := data.GetDB()
 	if err != nil {
 		return nil, err
@@ -153,7 +154,6 @@ func getProductsFromDb(categoryGUID string) ([]*Product, error) {
 	}
 	defer rows.Close()
 
-	products := []*Product{}
 	for rows.Next() {
 		product := &Product{}
 		if err = rows.Scan(
@@ -171,13 +171,13 @@ func getProductsFromDb(categoryGUID string) ([]*Product, error) {
 			&product.Handle,
 			&product.ModifiedTime,
 			&product.IsActive,
-			&product.IsDeleted); err != nil {
+			&product.IsDeleted,
+			&product.OrderID); err != nil {
 			return nil, fmt.Errorf("Error in spcCategoryProductsGet Scan: %s", err)
 		}
 		products = append(products, product)
 	}
 
-	// err = getAndSetTagsForProducts(products)
 	return products, err
 }
 
