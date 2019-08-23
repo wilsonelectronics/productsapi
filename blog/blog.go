@@ -15,12 +15,6 @@ const (
 	baseTopicURL = "https://api.hubapi.com/blogs/v3/topics?hapikey="
 )
 
-// Client . . .
-type Client struct {
-	baseURL string
-	apiKey  string
-}
-
 type request struct {
 	URL    string
 	Method string
