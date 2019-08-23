@@ -6,7 +6,13 @@ import (
 	"fmt"
 	"io/ioutil"
 	"net/http"
+	"os"
 	"strings"
+)
+
+const (
+	baseBlogURL  = "https://api.hubapi.com/content/api/v2/blog-posts?hapikey="
+	baseTopicURL = "https://api.hubapi.com/blogs/v3/topics?hapikey="
 )
 
 // Client . . .
@@ -15,7 +21,7 @@ type Client struct {
 	apiKey  string
 }
 
-type requestStruct struct {
+type request struct {
 	URL    string
 	Method string
 }
@@ -32,6 +38,11 @@ type TopicPostsResponseModel struct {
 	Posts []*postData `json:"posts"`
 }
 
+// CaseStudiesResponseModel . . .
+type CaseStudiesResponseModel struct {
+	Posts []*postData `json:"posts"`
+}
+
 // LoadMorePostsResponseModel . . .
 type LoadMorePostsResponseModel struct {
 	Posts postResponseModel `json:"posts"`
@@ -42,6 +53,29 @@ type PageResponseModel struct {
 	Topics []*topicData `json:"topics"`
 	Post   *postData    `json:"post"`
 	Posts  []*postData  `json:"featuredPosts"`
+}
+
+// HubSpotCookieResponseModel . . .
+type HubSpotCookieResponseModel struct {
+	VID              int                `json:"vid"`
+	CanonicalVid     int                `json:"canonical-vid"`
+	MergeVids        []interface{}      `json:"merged-vids"`
+	PortalID         int                `json:"portal-id"`
+	IsContact        bool               `json:"is-contact"`
+	ProfileToken     string             `json:"profile-token"`
+	ProfileURL       string             `json:"profile-url"`
+	Properties       interface{}        `json:"properties"`
+	FormSubmissions  []interface{}      `json:"form-submissions"`
+	ListMemberships  []interface{}      `json:"list-memberships"`
+	IdentityProfiles []identityProfiles `json:"identity-profiles"`
+	MergeAudits      []interface{}      `json:"merge-audits"`
+}
+
+type identityProfiles struct {
+	VID                     int           `json:"vid"`
+	SaveAtTimeStamp         int           `json:"saved-at-timestamp"`
+	DeletedChangedTimeStamp int           `json:"deleted-changed-timestamp"`
+	Identities              []interface{} `json:"identities"`
 }
 
 // singlePostResponseModel . . .
@@ -78,6 +112,11 @@ type topicData struct {
 	Slug string `json:"slug"`
 }
 
+type postTopic struct {
+	ID   int    `json:"id"`
+	Name string `json:"name"`
+}
+
 type postResponseModel struct {
 	Limit      int         `json:"limit"`
 	Objects    []*postData `json:"objects"`
@@ -112,9 +151,8 @@ func NewClient(baseURL, apiKey string) *Client {
 }
 
 // GetSliderTopicsRecentPosts . . .
-func (c *Client) GetSliderTopicsRecentPosts() (*SliderTopicsRecentPosts, error) {
-
-	posts, err := c.getPosts()
+func GetSliderTopicsRecentPosts() (*SliderTopicsRecentPosts, error) {
+	posts, err := getPosts()
 	if err != nil {
 		return nil, err
 	}
@@ -124,7 +162,7 @@ func (c *Client) GetSliderTopicsRecentPosts() (*SliderTopicsRecentPosts, error) 
 		return nil, err
 	}
 
-	topics, err := c.getTopics()
+	topics, err := getTopics()
 	if err != nil {
 		return nil, err
 	}
@@ -143,8 +181,8 @@ func (c *Client) GetSliderTopicsRecentPosts() (*SliderTopicsRecentPosts, error) 
 }
 
 // GetPostData . . .
-func (c *Client) GetPostData(postSlug string) (*PageResponseModel, error) {
-	post, err := c.getPost(postSlug)
+func GetPostData(postSlug string) (*PageResponseModel, error) {
+	post, err := getPost(postSlug)
 	if err != nil {
 		return nil, err
 	}
@@ -154,17 +192,17 @@ func (c *Client) GetPostData(postSlug string) (*PageResponseModel, error) {
 		return nil, err
 	}
 
-	topics, err := c.getTopics()
+	topics, err := getTopics()
 	if err != nil {
 		return nil, err
 	}
-
+	fmt.Println(string(topics))
 	var tdata topicResponseModel
 	if err = json.Unmarshal(topics, &tdata); err != nil {
 		return nil, err
 	}
 
-	posts, err := c.getFeaturedPosts()
+	posts, err := getFeaturedPosts()
 	if err != nil {
 		return nil, err
 	}
@@ -182,47 +220,8 @@ func (c *Client) GetPostData(postSlug string) (*PageResponseModel, error) {
 	return singlePost, err
 }
 
-// LoadMorePosts . . .
-func (c *Client) LoadMorePosts(offset int) (*LoadMorePostsResponseModel, error) {
-	posts, err := c.doRequest(requestStruct{
-		URL:    fmt.Sprintf("%s%s&limit=3&offset=%d&archived=false&property=id&property=html_title&property=post_summary&property=topic_ids&property=slug&property=featured_image&content_group_id=3708593652&state=published", c.baseURL, c.apiKey, offset),
-		Method: http.MethodGet})
-	if err != nil {
-		return nil, err
-	}
-
-	var pData postResponseModel
-	if err = json.Unmarshal(posts, &pData); err != nil {
-		return nil, err
-	}
-
-	morePosts := &LoadMorePostsResponseModel{
-		Posts: pData,
-	}
-
-	return morePosts, err
-}
-
-func (c *Client) getTopic(slugID int) ([]byte, error) {
-	return c.doRequest(requestStruct{
-		URL:    fmt.Sprintf("https://api.hubapi.com/blogs/v3/topics/%d?hapikey=%s&property=slug", slugID, c.apiKey),
-		Method: http.MethodGet})
-}
-
-func (c *Client) getTopics() ([]byte, error) {
-	return c.doRequest(requestStruct{
-		URL:    fmt.Sprintf("https://api.hubapi.com/blogs/v3/topics?hapikey=%s&property=id&property=name&property=slug", c.apiKey),
-		Method: http.MethodGet})
-}
-
-func (c *Client) getPost(slug string) ([]byte, error) {
-	return c.doRequest(requestStruct{
-		URL:    fmt.Sprintf("%s%s&slug=%s&archived=false&property=featured_image&property=name&property=slug&property=html_title&property=meta_description&property=publish_date&property=post_body&property=blog_author&state=published&property=topic_ids", c.baseURL, c.apiKey, slug),
-		Method: http.MethodGet})
-}
-
 // GetPostsWithTopicID . . .
-func (c *Client) GetPostsWithTopicID(topicSlugString string) (*TopicPostsResponseModel, error) {
+func GetPostsWithTopicID(topicSlugString string) (*TopicPostsResponseModel, error) {
 	var slugID int
 
 	topicSlug := strings.ToLower(topicSlugString)
@@ -255,9 +254,9 @@ func (c *Client) GetPostsWithTopicID(topicSlugString string) (*TopicPostsRespons
 			return 5208232018
 		case "events":
 			return 5208232018
-		case "cellphone signal booster":
+		case "cell phone signal booster":
 			return 5232260383
-		case "cellphone signal boosters":
+		case "cell phone signal boosters":
 			return 5232260383
 		case "4g signal booster":
 			return 5258816479
@@ -273,7 +272,7 @@ func (c *Client) GetPostsWithTopicID(topicSlugString string) (*TopicPostsRespons
 		return 0
 	}()
 
-	topic, err := c.getTopic(slugID)
+	topic, err := getTopic(slugID)
 	if err != nil {
 		return nil, err
 	}
@@ -283,8 +282,8 @@ func (c *Client) GetPostsWithTopicID(topicSlugString string) (*TopicPostsRespons
 		return nil, err
 	}
 
-	posts, err := c.doRequest(requestStruct{
-		URL:    fmt.Sprintf("%s%s&limit=1000&property=id&property=name&property=topic_ids&property=featured_image&property=publish_date&property=slug&content_group_id=3708593652&state=published", c.baseURL, c.apiKey),
+	posts, err := doRequest(request{
+		URL:    fmt.Sprintf("%s%s&limit=1000&property=id&property=name&property=topic_ids&property=featured_image&property=publish_date&property=slug&content_group_id=3708593652&state=published", baseBlogURL, os.Getenv("hubSpotAPI")),
 		Method: http.MethodGet})
 	if err != nil {
 		return nil, err
@@ -313,19 +312,89 @@ func (c *Client) GetPostsWithTopicID(topicSlugString string) (*TopicPostsRespons
 	return topicPosts, err
 }
 
-func (c *Client) getPosts() ([]byte, error) {
-	return c.doRequest(requestStruct{
-		URL:    fmt.Sprintf("%s%s&limit=5&archived=false&property=id&property=html_title&property=post_summary&property=publish_date&property=topic_ids&property=slug&property=featured_image&content_group_id=3708593652&state=published", c.baseURL, c.apiKey),
+// GetTwoCaseStudies . . .
+func GetTwoCaseStudies() (*CaseStudiesResponseModel, error) {
+	posts, err := doRequest(request{
+		URL:    fmt.Sprintf("%s%s&limit=1000&property=id&property=name&property=topic_ids&property=featured_image&property=publish_date&property=slug&content_group_id=3708593652&state=published", baseBlogURL, os.Getenv("hubSpotAPI")),
+		Method: http.MethodGet})
+
+	var postsData *postResponseModel
+	if err = json.Unmarshal(posts, &postsData); err != nil {
+		return nil, err
+	}
+
+	postsResponse := &CaseStudiesResponseModel{
+		Posts: postsData.Objects}
+
+	return postsResponse, err
+}
+
+// LoadMorePosts . . .
+func LoadMorePosts(offset int) (*LoadMorePostsResponseModel, error) {
+	posts, err := doRequest(request{
+		URL:    fmt.Sprintf("%s%s&limit=3&offset=%d&archived=false&property=id&property=html_title&property=post_summary&property=topic_ids&property=slug&property=featured_image&content_group_id=3708593652&state=published", baseBlogURL, os.Getenv("hubSpotAPI"), offset),
+		Method: http.MethodGet})
+	if err != nil {
+		return nil, err
+	}
+
+	var pData postResponseModel
+	if err = json.Unmarshal(posts, &pData); err != nil {
+		return nil, err
+	}
+
+	morePosts := &LoadMorePostsResponseModel{
+		Posts: pData,
+	}
+
+	return morePosts, err
+}
+
+// GetHubSpotCookies . . .
+func GetHubSpotCookies(hubSpotUTK string) (*HubSpotCookieResponseModel, error) {
+	cookies, err := doRequest(request{
+		URL:    fmt.Sprintf("http://api.hubapi.com/contacts/v1/contact/utk/%s/profile?hapikey=%s&property=form-submissions", hubSpotUTK, os.Getenv("hubSpotAPI")),
+		Method: http.MethodGet})
+
+	var cookiesData *HubSpotCookieResponseModel
+	if err = json.Unmarshal(cookies, &cookiesData); err != nil {
+		return nil, err
+	}
+	fmt.Println(cookiesData)
+	return cookiesData, err
+}
+
+func getTopic(slugID int) ([]byte, error) {
+	return doRequest(request{
+		URL:    fmt.Sprintf("https://api.hubapi.com/blogs/v3/topics/%d?hapikey=%s&property=slug", slugID, os.Getenv("hubSpotAPI")),
 		Method: http.MethodGet})
 }
 
-func (c *Client) getFeaturedPosts() ([]byte, error) {
-	return c.doRequest(requestStruct{
-		URL:    fmt.Sprintf("%s%s&limit=3&archived=false&property=id&property=html_title&property=slug&property=featured_image&content_group_id=3708593652&state=published", c.baseURL, c.apiKey),
+func getTopics() ([]byte, error) {
+	return doRequest(request{
+		URL:    fmt.Sprintf("%s%s", baseTopicURL, os.Getenv("hubSpotAPI")),
 		Method: http.MethodGet})
 }
 
-func (c *Client) doRequest(r requestStruct) ([]byte, error) {
+func getPost(slug string) ([]byte, error) {
+	return doRequest(request{
+		URL:    fmt.Sprintf("%s%s&slug=%s&archived=false&property=featured_image&property=name&property=slug&property=html_title&property=meta_description&property=publish_date&property=post_body&property=blog_author&state=published&property=topic_ids", baseBlogURL, os.Getenv("hubSpotAPI"), slug),
+		Method: http.MethodGet})
+}
+
+func getPosts() ([]byte, error) {
+	return doRequest(request{
+		URL:    fmt.Sprintf("%s%s&limit=5&archived=false&property=id&property=html_title&property=post_summary&property=publish_date&property=topic_ids&property=slug&property=featured_image&content_group_id=3708593652&state=published", baseBlogURL, os.Getenv("hubSpotAPI")),
+		Method: http.MethodGet})
+}
+
+func getFeaturedPosts() ([]byte, error) {
+	return doRequest(request{
+		URL:    fmt.Sprintf("%s%s&limit=3&archived=false&property=id&property=html_title&property=slug&property=featured_image&content_group_id=3708593652&state=published", baseBlogURL, os.Getenv("hubSpotAPI")),
+		Method: http.MethodGet})
+}
+
+func doRequest(r request) ([]byte, error) {
 	client := &http.Client{}
 
 	req, err := http.NewRequest(r.Method, r.URL, bytes.NewBuffer(nil))
