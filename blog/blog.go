@@ -40,7 +40,8 @@ type TopicPostsResponseModel struct {
 
 // CaseStudiesResponseModel . . .
 type CaseStudiesResponseModel struct {
-	Posts []*postData `json:"posts"`
+	Posts  []*postData  `json:"posts"`
+	Topics []*topicData `json:"topic"`
 }
 
 // LoadMorePostsResponseModel . . .
@@ -142,14 +143,6 @@ type postData struct {
 	BlogAuthor    *blogAuthor `json:"blog_author"`
 }
 
-// NewClient . . .
-func NewClient(baseURL, apiKey string) *Client {
-	return &Client{
-		baseURL: baseURL,
-		apiKey:  apiKey,
-	}
-}
-
 // GetSliderTopicsRecentPosts . . .
 func GetSliderTopicsRecentPosts() (*SliderTopicsRecentPosts, error) {
 	posts, err := getPosts()
@@ -172,12 +165,7 @@ func GetSliderTopicsRecentPosts() (*SliderTopicsRecentPosts, error) {
 		return nil, err
 	}
 
-	sliderTopicRecentPostsData := &SliderTopicsRecentPosts{
-		Posts:  pData,
-		Topics: tData,
-	}
-
-	return sliderTopicRecentPostsData, err
+	return &SliderTopicsRecentPosts{Posts: pData, Topics: tData}, err
 }
 
 // GetPostData . . .
@@ -212,12 +200,7 @@ func GetPostData(postSlug string) (*PageResponseModel, error) {
 		return nil, err
 	}
 
-	singlePost := &PageResponseModel{
-		Post:   data.Objects[0],
-		Topics: tdata.Objects,
-		Posts:  pdata.Objects}
-
-	return singlePost, err
+	return &PageResponseModel{Post: data.Objects[0], Topics: tdata.Objects, Posts: pdata.Objects}, err
 }
 
 // GetPostsWithTopicID . . .
@@ -304,29 +287,55 @@ func GetPostsWithTopicID(topicSlugString string) (*TopicPostsResponseModel, erro
 		}
 	}
 
-	topicPosts := &TopicPostsResponseModel{
-		Topic: &t,
-		Posts: tp,
-	}
-
-	return topicPosts, err
+	return &TopicPostsResponseModel{Topic: &t, Posts: tp}, err
 }
 
 // GetTwoCaseStudies . . .
 func GetTwoCaseStudies() (*CaseStudiesResponseModel, error) {
 	posts, err := doRequest(request{
-		URL:    fmt.Sprintf("%s%s&limit=1000&property=id&property=name&property=topic_ids&property=featured_image&property=publish_date&property=slug&content_group_id=3708593652&state=published", baseBlogURL, os.Getenv("hubSpotAPI")),
+		URL:    fmt.Sprintf("%s%s&limit=2&property=idd&property=name&property=topic_ids&property=featured_image&property=publish_date&property=slug&content_group_id=3708593652&state=published&topic_id=4126584798", baseBlogURL, os.Getenv("hubSpotAPI")),
 		Method: http.MethodGet})
+	if err != nil {
+		return nil, err
+	}
 
 	var postsData *postResponseModel
 	if err = json.Unmarshal(posts, &postsData); err != nil {
 		return nil, err
 	}
 
-	postsResponse := &CaseStudiesResponseModel{
-		Posts: postsData.Objects}
+	topics, err := doRequest(request{
+		URL:    fmt.Sprintf("%s%s", baseTopicURL, os.Getenv("hubSpotAPI")),
+		Method: http.MethodGet})
+	if err != nil {
+		return nil, err
+	}
 
-	return postsResponse, err
+	var tData *topicResponseModel
+	if err = json.Unmarshal(topics, &tData); err != nil {
+		return nil, err
+	}
+
+	contains := func(t []*topicData, id int) bool {
+		for _, v := range t {
+			if v.ID == id {
+				return true
+			}
+		}
+		return false
+	}
+
+	var t []*topicData
+	for _, p := range postsData.Objects {
+		for _, postTopicIDs := range p.TopicIds {
+			for _, topicIDs := range tData.Objects {
+				if postTopicIDs == topicIDs.ID && !contains(t, topicIDs.ID) {
+					t = append(t, &topicData{ID: topicIDs.ID, Name: topicIDs.Name, Slug: topicIDs.Slug})
+				}
+			}
+		}
+	}
+	return &CaseStudiesResponseModel{Posts: postsData.Objects, Topics: t}, err
 }
 
 // LoadMorePosts . . .
@@ -343,11 +352,7 @@ func LoadMorePosts(offset int) (*LoadMorePostsResponseModel, error) {
 		return nil, err
 	}
 
-	morePosts := &LoadMorePostsResponseModel{
-		Posts: pData,
-	}
-
-	return morePosts, err
+	return &LoadMorePostsResponseModel{Posts: pData}, err
 }
 
 // GetHubSpotCookies . . .
@@ -360,7 +365,6 @@ func GetHubSpotCookies(hubSpotUTK string) (*HubSpotCookieResponseModel, error) {
 	if err = json.Unmarshal(cookies, &cookiesData); err != nil {
 		return nil, err
 	}
-	fmt.Println(cookiesData)
 	return cookiesData, err
 }
 
