@@ -231,3 +231,41 @@ func GetMorePosts(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 	w.Write(p)
 }
+
+// GetRecentCaseStudies . . .
+func GetRecentCaseStudies(w http.ResponseWriter, r *http.Request) {
+
+	posts, err := blog.GetTwoCaseStudies()
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	postsJSON, err := json.Marshal(posts)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	w.Header().Set("Content-Type", "application/json")
+	w.Write(postsJSON)
+}
+
+// HubSpotCookie . . .
+func HubSpotCookie(w http.ResponseWriter, r *http.Request) {
+	inputParams := strings.Split(r.URL.Path, "/")
+	hupSpotUTK := inputParams[2]
+	cookies, err := blog.GetHubSpotCookies(hupSpotUTK)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	cookiesJSON, err := json.Marshal(cookies)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+	w.Header().Set("Content-Type", "application/json")
+	w.Write(cookiesJSON)
+}
