@@ -4,7 +4,6 @@ import (
 	"encoding/json"
 	"fmt"
 	"net/http"
-	"os"
 	"strconv"
 	"strings"
 
@@ -14,10 +13,6 @@ import (
 	"github.com/wilsonelectronics/productsapi/category"
 	"github.com/wilsonelectronics/productsapi/product"
 	"github.com/wilsonelectronics/productsapi/tag"
-)
-
-const (
-	baseURL = "https://api.hubapi.com/content/api/v2/blog-posts?hapikey="
 )
 
 // GetProduct . . .
@@ -166,9 +161,7 @@ func FlushRedisDB(w http.ResponseWriter, r *http.Request) {
 
 // GetBlogPostsAndTopics . . .
 func GetBlogPostsAndTopics(w http.ResponseWriter, r *http.Request) {
-	client := blog.NewClient(baseURL, os.Getenv("hubSpotAPI"))
-
-	response, err := client.GetSliderTopicsRecentPosts()
+	response, err := blog.GetSliderTopicsRecentPosts()
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
@@ -186,12 +179,10 @@ func GetBlogPostsAndTopics(w http.ResponseWriter, r *http.Request) {
 
 // GetTopicPosts . . .
 func GetTopicPosts(w http.ResponseWriter, r *http.Request) {
-	client := blog.NewClient(baseURL, os.Getenv("hubSpotAPI"))
-
 	//inputParams := strings.Split(r.URL.Path, "/")[3:]
 	topic := r.FormValue("slug")
 
-	topicPosts, err := client.GetPostsWithTopicID(topic)
+	topicPosts, err := blog.GetPostsWithTopicID(topic)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 	}
@@ -203,11 +194,9 @@ func GetTopicPosts(w http.ResponseWriter, r *http.Request) {
 
 // GetPost . . .
 func GetPost(w http.ResponseWriter, r *http.Request) {
-	client := blog.NewClient(baseURL, os.Getenv("hubSpotAPI"))
-
 	postSlug := r.FormValue("slug")
 
-	postData, err := client.GetPostData(postSlug)
+	postData, err := blog.GetPostData(postSlug)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
@@ -227,9 +216,7 @@ func GetMorePosts(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	client := blog.NewClient(baseURL, os.Getenv("hubSpotAPI"))
-
-	posts, err := client.LoadMorePosts(offset)
+	posts, err := blog.LoadMorePosts(offset)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
