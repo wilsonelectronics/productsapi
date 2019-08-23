@@ -293,7 +293,7 @@ func GetPostsWithTopicID(topicSlugString string) (*TopicPostsResponseModel, erro
 // GetTwoCaseStudies . . .
 func GetTwoCaseStudies() (*CaseStudiesResponseModel, error) {
 	posts, err := doRequest(request{
-		URL:    fmt.Sprintf("%s%s&limit=2&property=idd&property=name&property=topic_ids&property=featured_image&property=publish_date&property=slug&content_group_id=3708593652&state=published&topic_id=4126584798", baseBlogURL, os.Getenv("hubSpotAPI")),
+		URL:    fmt.Sprintf("%s%s&limit=2&property=id&property=name&property=topic_ids&property=featured_image&property=publish_date&property=slug&content_group_id=3708593652&state=published&topic_id=4126584798", baseBlogURL, os.Getenv("hubSpotAPI")),
 		Method: http.MethodGet})
 	if err != nil {
 		return nil, err
