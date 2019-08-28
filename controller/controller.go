@@ -17,25 +17,25 @@ import (
 
 // GetProduct . . .
 func GetProduct(w http.ResponseWriter, r *http.Request) {
-	inputParams := strings.Split(r.URL.Path, "/")[2:]
-	handle := inputParams[0]
+	handle := strings.Split(r.URL.Path, "/")[2:][0]
+	if handle == "" {
+		http.Error(w, "Missing product handle parameter", http.StatusBadRequest)
+		return
+	}
 
 	product, err := product.GetByHandle(handle)
 	if err != nil {
-		w.WriteHeader(http.StatusInternalServerError)
-		fmt.Fprintln(w, err)
+		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
 
 	productJSON, err := json.Marshal(product)
 	if err != nil {
-		w.WriteHeader(http.StatusInternalServerError)
-		fmt.Fprintln(w, err)
+		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
 
 	w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(http.StatusOK)
 	w.Write(productJSON)
 }
 

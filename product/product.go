@@ -3,6 +3,7 @@ package product
 import (
 	"encoding/json"
 	"fmt"
+	"sync"
 
 	"github.com/wilsonelectronics/productsapi/cache"
 	"github.com/wilsonelectronics/productsapi/data"
@@ -106,6 +107,30 @@ type productTag struct {
 	IsActive    bool   `json:"isActive"`
 }
 
+type chanResult struct {
+	Result interface{}
+	Error  error
+}
+
+func mergeChans(cs ...<-chan *chanResult) <-chan *chanResult {
+	out := make(chan *chanResult)
+	var wg sync.WaitGroup
+	wg.Add(len(cs))
+	for _, c := range cs {
+		go func(c <-chan *chanResult) {
+			for v := range c {
+				out <- v
+			}
+			wg.Done()
+		}(c)
+	}
+	go func() {
+		wg.Wait()
+		close(out)
+	}()
+	return out
+}
+
 // GetByHandle . . .
 func GetByHandle(handle string) (*Product, error) {
 	bytes, err := cache.Retrieve(handle)
@@ -124,7 +149,7 @@ func GetByHandle(handle string) (*Product, error) {
 
 func getFromDbAndCache(handle string) (*Product, error) {
 	db, err := data.GetDB()
-	if db == nil || err != nil {
+	if err != nil {
 		return nil, err
 	}
 	defer db.Close()
@@ -151,26 +176,42 @@ func getFromDbAndCache(handle string) (*Product, error) {
 		return nil, fmt.Errorf("spcProductGet Query Scan failed: %s", err)
 	}
 
-	if product.Kits, err = getKits(product.GUID); err != nil {
-		return nil, err
-	}
-	if product.Vendors, err = getVendors(product.GUID); err != nil {
-		return nil, err
-	}
-	if product.RelatedProducts, err = getRelatedProducts(product.GUID); err != nil {
-		return nil, err
-	}
-	if product.Specifications, err = getSpecifications(product.GUID); err != nil {
-		return nil, err
-	}
-	if product.Medias, err = getMedias(product.GUID); err != nil {
-		return nil, err
-	}
-	if product.Notes, err = getNotes(product.GUID); err != nil {
-		return nil, err
-	}
-	if product.Tags, err = getTags(product.GUID); err != nil {
-		return nil, err
+	kitChan := make(chan *chanResult)
+	vendorChan := make(chan *chanResult)
+	relatedProductsChan := make(chan *chanResult)
+	specificationsChan := make(chan *chanResult)
+	mediasChan := make(chan *chanResult)
+	notesChan := make(chan *chanResult)
+	tagsChan := make(chan *chanResult)
+
+	go getKits(product.GUID, kitChan)
+	go getVendors(product.GUID, vendorChan)
+	go getRelatedProducts(product.GUID, relatedProductsChan)
+	go getSpecifications(product.GUID, specificationsChan)
+	go getMedias(product.GUID, mediasChan)
+	go getNotes(product.GUID, notesChan)
+	go getTags(product.GUID, tagsChan)
+
+	for ch := range mergeChans(kitChan, vendorChan, relatedProductsChan, specificationsChan, mediasChan, notesChan, tagsChan) {
+		if ch.Error != nil {
+			return nil, ch.Error
+		}
+
+		if k, ok := ch.Result.(*kit); ok {
+			product.Kits = append(product.Kits, k)
+		} else if v, ok := ch.Result.(*productVendor); ok {
+			product.Vendors = append(product.Vendors, v)
+		} else if rp, ok := ch.Result.(*relatedProduct); ok {
+			product.RelatedProducts = append(product.RelatedProducts, rp)
+		} else if s, ok := ch.Result.(*productSpecification); ok {
+			product.Specifications = append(product.Specifications, s)
+		} else if m, ok := ch.Result.(*media); ok {
+			product.Medias = append(product.Medias, m)
+		} else if n, ok := ch.Result.(*note); ok {
+			product.Notes = append(product.Notes, n)
+		} else if t, ok := ch.Result.(*productTag); ok {
+			product.Tags = append(product.Tags, t)
+		}
 	}
 
 	productJSON, err := json.Marshal(product)
@@ -182,86 +223,90 @@ func getFromDbAndCache(handle string) (*Product, error) {
 	return product, nil
 }
 
-func getKits(id string) ([]*kit, error) {
+func getKits(id string, ch chan *chanResult) {
+	defer close(ch)
+
 	db, err := data.GetDB()
-	if db == nil || err != nil {
-		return nil, err
+	if err != nil {
+		ch <- &chanResult{Error: err}
+		return
 	}
 	defer db.Close()
 
 	rows, err := db.Query("set nocount on; exec [spcProductKitGet] ?", id)
 	if err != nil {
-		return nil, fmt.Errorf("spcProductKitGet Query failed: %s", err)
+		ch <- &chanResult{Error: fmt.Errorf("spcProductKitGet Query failed: %s", err)}
+		return
 	}
 	defer rows.Close()
 
-	kits := []*kit{}
-
 	for rows.Next() {
-		k := &kit{}
+		r := &kit{}
 
 		if err = rows.Scan(
-			&k.GUID,
-			&k.ProductGUID,
-			&k.KitItemName,
-			&k.KitItemLinkURL,
-			&k.KitItemIconURL,
-			&k.ItemOrder,
-			&k.SKU); err != nil {
-			return nil, fmt.Errorf("spcProductKitGet Query Scan failed: %s", err)
+			&r.GUID,
+			&r.ProductGUID,
+			&r.KitItemName,
+			&r.KitItemLinkURL,
+			&r.KitItemIconURL,
+			&r.ItemOrder,
+			&r.SKU); err != nil {
+			ch <- &chanResult{Error: fmt.Errorf("spcProductKitGet Query Scan failed: %s", err)}
 		}
-		kits = append(kits, k)
+		ch <- &chanResult{Result: r}
 	}
-	return kits, nil
 }
 
-func getVendors(id string) ([]*productVendor, error) {
+func getVendors(id string, ch chan *chanResult) {
+	defer close(ch)
+
 	db, err := data.GetDB()
-	if db == nil || err != nil {
-		return nil, err
+	if err != nil {
+		ch <- &chanResult{Error: err}
+		return
 	}
 	defer db.Close()
 
 	rows, err := db.Query("set nocount on; exec [spcProductVendorGet] ?", id)
 	if err != nil {
-		return nil, fmt.Errorf("spcProductVendorGet Query failed: %s", err)
+		ch <- &chanResult{Error: fmt.Errorf("spcProductVendorGet Query failed: %s", err)}
+		return
 	}
 	defer rows.Close()
 
-	vendors := []*productVendor{}
-
 	for rows.Next() {
-		v := &productVendor{}
+		r := &productVendor{}
 
 		if err = rows.Scan(
-			&v.GUID,
-			&v.ProductGUID,
-			&v.VendorID,
-			&v.VendorName,
-			&v.VendorImageURL,
-			&v.ProductVendorURL,
+			&r.GUID,
+			&r.ProductGUID,
+			&r.VendorID,
+			&r.VendorName,
+			&r.VendorImageURL,
+			&r.ProductVendorURL,
 		); err != nil {
-			return nil, fmt.Errorf("spcProductVendorGet Query Scan failed: %s", err)
+			ch <- &chanResult{Error: fmt.Errorf("spcProductVendorGet Query Scan failed: %s", err)}
 		}
-		vendors = append(vendors, v)
+		ch <- &chanResult{Result: r}
 	}
-	return vendors, err
 }
 
-func getRelatedProducts(id string) ([]*relatedProduct, error) {
+func getRelatedProducts(id string, ch chan *chanResult) {
+	defer close(ch)
+
 	db, err := data.GetDB()
-	if db == nil || err != nil {
-		return nil, err
+	if err != nil {
+		ch <- &chanResult{Error: err}
+		return
 	}
 	defer db.Close()
 
 	rows, err := db.Query("set nocount on; exec [spcProductRelatedGet] ?", id)
 	if err != nil {
-		return nil, fmt.Errorf("spcProductRelatedGet Query failed: %s", err)
+		ch <- &chanResult{Error: fmt.Errorf("spcProductRelatedGet Query failed: %s", err)}
+		return
 	}
 	defer rows.Close()
-
-	related := []*relatedProduct{}
 
 	for rows.Next() {
 		r := &relatedProduct{}
@@ -273,141 +318,142 @@ func getRelatedProducts(id string) ([]*relatedProduct, error) {
 			&r.ImageURL,
 			&r.Handle,
 		); err != nil {
-			return nil, fmt.Errorf("spcProductRelatedGet Query Scan failed: %s", err)
+			ch <- &chanResult{Error: fmt.Errorf("spcProductRelatedGet Query Scan failed: %s", err)}
 		}
-		related = append(related, r)
+		ch <- &chanResult{Result: r}
 	}
-
-	return related, err
 }
 
-func getSpecifications(id string) ([]*productSpecification, error) {
+func getSpecifications(id string, ch chan *chanResult) {
+	defer close(ch)
+
 	db, err := data.GetDB()
-	if db == nil || err != nil {
-		return nil, err
+	if err != nil {
+		ch <- &chanResult{Error: err}
+		return
 	}
 	defer db.Close()
 
 	rows, err := db.Query("set nocount on; exec [spcProductSpecificationsGet] ?", id)
 	if err != nil {
-		return nil, fmt.Errorf("getProductSpecifications Query failed: %s", err)
+		ch <- &chanResult{Error: fmt.Errorf("getProductSpecifications Query failed: %s", err)}
+		return
 	}
 	defer rows.Close()
 
-	specs := []*productSpecification{}
-
 	for rows.Next() {
-		s := &productSpecification{}
+		r := &productSpecification{}
 
 		if err = rows.Scan(
-			&s.GUID,
-			&s.ProductGUID,
-			&s.SpecificationID,
-			&s.FieldValue,
-			&s.IsActive,
-			&s.SpecificationLabel); err != nil {
-			return nil, fmt.Errorf("getProductSpecifications Query Scan failed: %s", err)
+			&r.GUID,
+			&r.ProductGUID,
+			&r.SpecificationID,
+			&r.FieldValue,
+			&r.IsActive,
+			&r.SpecificationLabel); err != nil {
+			ch <- &chanResult{Error: fmt.Errorf("getProductSpecifications Query Scan failed: %s", err)}
 		}
-		specs = append(specs, s)
+		ch <- &chanResult{Result: r}
 	}
-	return specs, err
 }
 
-func getMedias(id string) ([]*media, error) {
+func getMedias(id string, ch chan *chanResult) {
+	defer close(ch)
+
 	db, err := data.GetDB()
-	if db == nil || err != nil {
-		return nil, err
+	if err != nil {
+		ch <- &chanResult{Error: err}
+		return
 	}
 	defer db.Close()
 
 	rows, err := db.Query("set nocount on; exec [spcProductMediaGet] ?", id)
 	if err != nil {
-		return nil, fmt.Errorf("getProductMedia Query failed: %s", err)
+		ch <- &chanResult{Error: fmt.Errorf("getProductMedia Query failed: %s", err)}
+		return
 	}
 	defer rows.Close()
 
-	medias := []*media{}
-
 	for rows.Next() {
-		m := &media{}
+		r := &media{}
 
 		if err = rows.Scan(
-			&m.GUID,
-			&m.ProductGUID,
-			&m.MediaTypeID,
-			&m.MediaTitle,
-			&m.MediaLinkURL,
-			&m.MediaLogoURL,
-			&m.MediaOrder,
-			&m.IsActive); err != nil {
-			return nil, fmt.Errorf("getProductMedia Query Scan failed: %s", err)
+			&r.GUID,
+			&r.ProductGUID,
+			&r.MediaTypeID,
+			&r.MediaTitle,
+			&r.MediaLinkURL,
+			&r.MediaLogoURL,
+			&r.MediaOrder,
+			&r.IsActive); err != nil {
+			ch <- &chanResult{Error: fmt.Errorf("getProductMedia Query Scan failed: %s", err)}
 		}
-		medias = append(medias, m)
+		ch <- &chanResult{Result: r}
 	}
-	return medias, err
 }
 
-func getNotes(id string) ([]*note, error) {
+func getNotes(id string, ch chan *chanResult) {
+	defer close(ch)
+
 	db, err := data.GetDB()
-	if db == nil || err != nil {
-		return nil, err
+	if err != nil {
+		ch <- &chanResult{Error: err}
+		return
 	}
 	defer db.Close()
 
 	rows, err := db.Query("set nocount on; exec [spcProductNotesGet] ?", id)
 	if err != nil {
-		return nil, fmt.Errorf("getProductNotes Query failed: %s", err)
+		ch <- &chanResult{Error: fmt.Errorf("getProductNotes Query failed: %s", err)}
+		return
 	}
 	defer rows.Close()
 
-	notes := []*note{}
-
 	for rows.Next() {
-		n := &note{}
+		r := &note{}
 
 		if err = rows.Scan(
-			&n.GUID,
-			&n.ProductGUID,
-			&n.NoteTypeID,
-			&n.NoteText,
-			&n.NoteOrder,
-			&n.NoteTitle,
-			&n.NoteIconImageURL); err != nil {
-			return nil, fmt.Errorf("getProductNotes Query Scan failed: %s", err)
+			&r.GUID,
+			&r.ProductGUID,
+			&r.NoteTypeID,
+			&r.NoteText,
+			&r.NoteOrder,
+			&r.NoteTitle,
+			&r.NoteIconImageURL); err != nil {
+			ch <- &chanResult{Error: fmt.Errorf("getProductNotes Query Scan failed: %s", err)}
 		}
-		notes = append(notes, n)
+		ch <- &chanResult{Result: r}
 	}
-	return notes, err
 }
 
-func getTags(id string) ([]*productTag, error) {
+func getTags(id string, ch chan *chanResult) {
+	defer close(ch)
+
 	db, err := data.GetDB()
-	if db == nil || err != nil {
-		return nil, err
+	if err != nil {
+		ch <- &chanResult{Error: err}
+		return
 	}
 	defer db.Close()
 
 	rows, err := db.Query("set nocount on; exec [spcProductTagsGet] ?", id)
 	if err != nil {
-		return nil, fmt.Errorf("spcProductTagsGet Query failed: %s", err)
+		ch <- &chanResult{Error: fmt.Errorf("spcProductTagsGet Query failed: %s", err)}
+		return
 	}
 	defer rows.Close()
 
-	tags := []*productTag{}
-
 	for rows.Next() {
-		t := &productTag{}
+		r := &productTag{}
 
 		if err = rows.Scan(
-			&t.GUID,
-			&t.ProductGUID,
-			&t.TagID,
-			&t.Tag,
-			&t.IsActive); err != nil {
-			return nil, fmt.Errorf("spcProductTagsGet Query Scan failed: %s", err)
+			&r.GUID,
+			&r.ProductGUID,
+			&r.TagID,
+			&r.Tag,
+			&r.IsActive); err != nil {
+			ch <- &chanResult{Error: fmt.Errorf("spcProductTagsGet Query Scan failed: %s", err)}
 		}
-		tags = append(tags, t)
+		ch <- &chanResult{Result: r}
 	}
-
-	return tags, err
 }
