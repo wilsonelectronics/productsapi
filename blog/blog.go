@@ -275,8 +275,7 @@ func GetPostsWithTopicID(topicSlugString string) (*TopicPostsResponseModel, erro
 	for _, p := range tPosts.Objects {
 		for _, id := range p.TopicIds {
 			if id == slugID {
-				newPost := &postData{FeaturedImage: p.FeaturedImage, HTMLTitle: p.HTMLTitle, ID: p.ID, Name: p.Name, PostSummary: p.PostSummary, Slug: p.Slug, TopicIds: p.TopicIds}
-				tp = append(tp, newPost)
+				tp = append(tp, &postData{FeaturedImage: p.FeaturedImage, HTMLTitle: p.HTMLTitle, ID: p.ID, Name: p.Name, PostSummary: p.PostSummary, Slug: p.Slug, TopicIds: p.TopicIds})
 			}
 		}
 	}
