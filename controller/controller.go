@@ -253,8 +253,7 @@ func GetRecentCaseStudies(w http.ResponseWriter, r *http.Request) {
 
 // HubSpotCookie . . .
 func HubSpotCookie(w http.ResponseWriter, r *http.Request) {
-	inputParams := strings.Split(r.URL.Path, "/")
-	hupSpotUTK := inputParams[2]
+	hupSpotUTK := strings.Split(r.URL.Path, "/")[2]
 	cookies, err := blog.GetHubSpotCookies(hupSpotUTK)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
