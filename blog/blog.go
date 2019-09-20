@@ -334,7 +334,7 @@ func GetTwoCaseStudies() (*CaseStudiesResponseModel, error) {
 // LoadMorePosts . . .
 func LoadMorePosts(offset int) (*LoadMorePostsResponseModel, error) {
 	posts, err := doRequest(request{
-		URL:    fmt.Sprintf("%s%s&limit=3&offset=%d&archived=false&property=id&property=html_title&property=post_summary&property=topic_ids&property=slug&property=featured_image&content_group_id=3708593652&state=published", baseBlogURL, os.Getenv("hubSpotAPI"), offset),
+		URL:    fmt.Sprintf("%s%s&limit=3&offset=%d&archived=false&property=id&property=publish_date&property=html_title&property=post_summary&property=topic_ids&property=slug&property=featured_image&content_group_id=3708593652&state=published", baseBlogURL, os.Getenv("hubSpotAPI"), offset),
 		Method: http.MethodGet})
 	if err != nil {
 		return nil, err
@@ -381,7 +381,7 @@ func getPost(slug string) ([]byte, error) {
 
 func getPosts() ([]byte, error) {
 	return doRequest(request{
-		URL:    fmt.Sprintf("%s%s&limit=5&archived=false&property=id&property=html_title&property=post_summary&property=publish_date&property=topic_ids&property=slug&property=featured_image&content_group_id=3708593652&state=published", baseBlogURL, os.Getenv("hubSpotAPI")),
+		URL:    fmt.Sprintf("%s%s&limit=6&archived=false&property=id&property=html_title&property=post_summary&property=publish_date&property=topic_ids&property=slug&property=featured_image&content_group_id=3708593652&state=published", baseBlogURL, os.Getenv("hubSpotAPI")),
 		Method: http.MethodGet})
 }
 
