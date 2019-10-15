@@ -245,6 +245,8 @@ func GetPostsWithTopicID(topicSlugString string) (*TopicPostsResponseModel, erro
 			return 6845697866
 		case "5g":
 			return 8559218284
+		case "retail":
+			return 13036607014
 		}
 		return 0
 	}()
