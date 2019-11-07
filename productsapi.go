@@ -19,12 +19,36 @@ type HandlerOptions struct {
 	corsOptions []handlers.CORSOption
 }
 
+type serverError struct {
+	Message string
+	Status  int
+}
+
 // Handler . . .
 func Handler(opts *HandlerOptions) http.Handler {
 	if opts == nil {
 		panic("Invalid HandlerOptions provided")
 	}
 	r := mux.NewRouter()
+	r.Use(func(next http.Handler) http.Handler {
+		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+			defer func() {
+				if err := recover(); err != nil {
+					switch t := err.(type) {
+					case string:
+						http.Error(w, t, http.StatusInternalServerError)
+					case error:
+						http.Error(w, t.Error(), http.StatusInternalServerError)
+					case serverError:
+						http.Error(w, t.Message, t.Status)
+					default:
+						http.Error(w, "unknown error", http.StatusInternalServerError)
+					}
+				}
+			}()
+			next.ServeHTTP(w, r)
+		})
+	})
 	for _, v := range opts.routes {
 		r.HandleFunc(v.Path, v.Handler)
 	}
