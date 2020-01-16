@@ -194,7 +194,11 @@ func GetPostData(postSlug string) (*PageResponseModel, error) {
 		return nil, err
 	}
 
-	return &PageResponseModel{Post: data.Objects[0], Topics: tdata.Objects, Posts: pdata.Objects}, err
+	pageResModel := PageResponseModel{Topics: tdata.Objects, Posts: pdata.Objects}
+	if len(data.Objects) > 0 {
+		pageResModel.Post = data.Objects[0]
+	}
+	return &pageResModel, err
 }
 
 // GetPostsWithTopicID . . .
