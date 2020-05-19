@@ -387,13 +387,13 @@ func getPost(slug string) ([]byte, error) {
 
 func getPosts() ([]byte, error) {
 	return doRequest(request{
-		URL:    fmt.Sprintf("%s%s&limit=6&archived=false&property=id&property=html_title&property=post_summary&property=publish_date&property=topic_ids&property=slug&property=featured_image&content_group_id=3708593652&state=published", baseBlogURL, os.Getenv("hubSpotAPI")),
+		URL:    fmt.Sprintf("%s%s&limit=6&archived=false&property=id&property=html_title&property=name&property=post_summary&property=publish_date&property=topic_ids&property=slug&property=featured_image&content_group_id=3708593652&state=published", baseBlogURL, os.Getenv("hubSpotAPI")),
 		Method: http.MethodGet})
 }
 
 func getFeaturedPosts() ([]byte, error) {
 	return doRequest(request{
-		URL:    fmt.Sprintf("%s%s&limit=3&archived=false&property=id&property=html_title&property=slug&property=featured_image&content_group_id=3708593652&state=published", baseBlogURL, os.Getenv("hubSpotAPI")),
+		URL:    fmt.Sprintf("%s%s&limit=3&archived=false&property=id&property=html_title&property=name&property=slug&property=featured_image&content_group_id=3708593652&state=published", baseBlogURL, os.Getenv("hubSpotAPI")),
 		Method: http.MethodGet})
 }
 
