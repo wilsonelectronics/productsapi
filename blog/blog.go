@@ -7,11 +7,10 @@ import (
 	"io/ioutil"
 	"net/http"
 	"os"
-	"strings"
 )
 
 const (
-	baseBlogURL  = "https://api.hubapi.com/content/api/v2/blog-posts?hapikey="
+	baseBlogURL  = "https://api.hubapi.com/content/api/v2/blog-posts?content_group_id=3708593652&state=published&hapikey="
 	baseTopicURL = "https://api.hubapi.com/blogs/v3/topics?hapikey="
 )
 
@@ -26,10 +25,19 @@ type SliderTopicsRecentPosts struct {
 	Posts  postResponseModel  `json:"posts"`
 }
 
+type topicPostData []struct {
+	ID            int64   `json:"id"`
+	Name          string  `json:"name"`
+	FeaturedImage string  `json:"featured_image"`
+	Slug          string  `json:"slug"`
+	PublishDate   int64   `json:"publish_date"`
+	TopicIds      []int64 `json:"topic_ids"`
+}
+
 // TopicPostsResponseModel . . .
 type TopicPostsResponseModel struct {
-	Topic *topicData  `json:"topic"`
-	Posts []*postData `json:"posts"`
+	Topic topicData     `json:"topic"`
+	Posts topicPostData `json:"posts"`
 }
 
 // CaseStudiesResponseModel . . .
@@ -102,7 +110,7 @@ type blogAuthor struct {
 }
 
 type topicData struct {
-	ID   int    `json:"id"`
+	ID   int64  `json:"id"`
 	Name string `json:"name"`
 	Slug string `json:"slug"`
 }
@@ -133,7 +141,7 @@ type postData struct {
 	PostBody      string      `json:"post_body"`
 	PublishDate   int         `json:"publish_date"`
 	Slug          string      `json:"slug"`
-	TopicIds      []int       `json:"topic_ids"`
+	TopicIDs      []int64     `json:"topic_ids"`
 	BlogAuthor    *blogAuthor `json:"blog_author"`
 }
 
@@ -203,90 +211,39 @@ func GetPostData(postSlug string) (*PageResponseModel, error) {
 
 // GetPostsWithTopicID . . .
 func GetPostsWithTopicID(topicSlugString string) (*TopicPostsResponseModel, error) {
-	var slugID int
-
-	topicSlug := strings.ToLower(topicSlugString)
-
-	ts := strings.ReplaceAll(topicSlug, "-", " ")
-
-	slugID = func() int {
-		switch ts {
-		case "resellers":
-			return 4463036677
-		case "dealers":
-			return 4463036677
-		case "passive das vs active das":
-			return 3908520381
-		case "small business":
-			return 3984404787
-		case "office solutions":
-			return 3984404787
-		case "case studies":
-			return 4126584798
-		case "m2m":
-			return 4463032372
-		case "commercial buildings":
-			return 4463034582
-		case "residential":
-			return 4474989641
-		case "passive das":
-			return 5208231936
-		case "event":
-			return 5208232018
-		case "events":
-			return 5208232018
-		case "cell phone signal booster":
-			return 5232260383
-		case "cell phone signal boosters":
-			return 5232260383
-		case "4g signal booster":
-			return 5258816479
-		case "integrators":
-			return 6472497905
-		case "financial":
-			return 6488598601
-		case "healthcare":
-			return 6845697866
-		case "5g":
-			return 8559218284
-		case "retail":
-			return 13036607014
-		}
-		return 0
-	}()
-
-	topic, err := getTopic(slugID)
+	var response TopicPostsResponseModel
+	topicsResp, err := http.Get(fmt.Sprintf("%s%s&slug=%s&property=id&property=name&property=slug", baseTopicURL, os.Getenv("hubSpotAPI"), topicSlugString))
 	if err != nil {
 		return nil, err
 	}
 
-	var t topicData
-	if err = json.Unmarshal(topic, &t); err != nil {
-		return nil, err
+	var topicsBody struct {
+		Objects []topicData `json:"objects"`
 	}
-
-	posts, err := doRequest(request{
-		URL:    fmt.Sprintf("%s%s&limit=1000&property=id&property=name&property=topic_ids&property=featured_image&property=publish_date&property=slug&content_group_id=3708593652&state=published", baseBlogURL, os.Getenv("hubSpotAPI")),
-		Method: http.MethodGet})
+	err = json.NewDecoder(topicsResp.Body).Decode(&topicsBody)
 	if err != nil {
 		return nil, err
 	}
-	var tPosts *postResponseModel
 
-	if err = json.Unmarshal(posts, &tPosts); err != nil {
+	if topicsBody.Objects == nil || len(topicsBody.Objects) == 0 {
+		return nil, fmt.Errorf("could not find topic with slug %s", topicSlugString)
+	}
+	response.Topic = topicsBody.Objects[0]
+
+	blogPostsResp, err := http.Get(fmt.Sprintf("%s%s&topic_id=%d&property=id&property=name&property=topic_ids&property=featured_image&property=publish_date&property=slug", baseBlogURL, os.Getenv("hubSpotAPI"), response.Topic.ID))
+	if err != nil {
 		return nil, err
 	}
 
-	var tp []*postData
-	for _, p := range tPosts.Objects {
-		for _, id := range p.TopicIds {
-			if id == slugID {
-				tp = append(tp, &postData{FeaturedImage: p.FeaturedImage, HTMLTitle: p.HTMLTitle, ID: p.ID, Name: p.Name, PostSummary: p.PostSummary, Slug: p.Slug, TopicIds: p.TopicIds})
-			}
-		}
+	var blogPostsBody struct {
+		Objects topicPostData `json:"objects"`
 	}
+	if err := json.NewDecoder(blogPostsResp.Body).Decode(&blogPostsBody); err != nil {
+		return nil, err
+	}
+	response.Posts = blogPostsBody.Objects
 
-	return &TopicPostsResponseModel{Topic: &t, Posts: tp}, err
+	return &response, nil
 }
 
 // GetTwoCaseStudies . . .
@@ -315,7 +272,7 @@ func GetTwoCaseStudies() (*CaseStudiesResponseModel, error) {
 		return nil, err
 	}
 
-	contains := func(t []*topicData, id int) bool {
+	contains := func(t []*topicData, id int64) bool {
 		for _, v := range t {
 			if v.ID == id {
 				return true
@@ -326,7 +283,7 @@ func GetTwoCaseStudies() (*CaseStudiesResponseModel, error) {
 
 	var t []*topicData
 	for _, p := range postsData.Objects {
-		for _, postTopicIDs := range p.TopicIds {
+		for _, postTopicIDs := range p.TopicIDs {
 			for _, topicIDs := range tData.Objects {
 				if postTopicIDs == topicIDs.ID && !contains(t, topicIDs.ID) {
 					t = append(t, &topicData{ID: topicIDs.ID, Name: topicIDs.Name, Slug: topicIDs.Slug})
@@ -340,7 +297,7 @@ func GetTwoCaseStudies() (*CaseStudiesResponseModel, error) {
 // LoadMorePosts . . .
 func LoadMorePosts(offset int) (*LoadMorePostsResponseModel, error) {
 	posts, err := doRequest(request{
-		URL:    fmt.Sprintf("%s%s&limit=3&offset=%d&archived=false&property=id&property=html_title&property=post_summary&property=publish_date&property=topic_ids&property=slug&property=featured_image&content_group_id=3708593652&state=published", baseBlogURL, os.Getenv("hubSpotAPI"), offset),
+		URL:    fmt.Sprintf("%s%s&limit=3&offset=%d&archived=false&property=id&property=html_title&property=post_summary&property=publish_date&property=topic_ids&property=slug&property=featured_image", baseBlogURL, os.Getenv("hubSpotAPI"), offset),
 		Method: http.MethodGet})
 	if err != nil {
 		return nil, err
@@ -381,19 +338,19 @@ func getTopics() ([]byte, error) {
 
 func getPost(slug string) ([]byte, error) {
 	return doRequest(request{
-		URL:    fmt.Sprintf("%s%s&slug=%s&archived=false&property=featured_image&property=name&property=slug&property=html_title&property=meta_description&property=publish_date&property=post_body&property=blog_author&state=published&property=topic_ids", baseBlogURL, os.Getenv("hubSpotAPI"), slug),
+		URL:    fmt.Sprintf("%s%s&slug=%s&archived=false&property=featured_image&property=name&property=slug&property=html_title&property=meta_description&property=publish_date&property=post_body&property=blog_author&property=topic_ids", baseBlogURL, os.Getenv("hubSpotAPI"), slug),
 		Method: http.MethodGet})
 }
 
 func getPosts() ([]byte, error) {
 	return doRequest(request{
-		URL:    fmt.Sprintf("%s%s&limit=6&archived=false&property=id&property=html_title&property=name&property=post_summary&property=publish_date&property=topic_ids&property=slug&property=featured_image&content_group_id=3708593652&state=published", baseBlogURL, os.Getenv("hubSpotAPI")),
+		URL:    fmt.Sprintf("%s%s&limit=6&archived=false&property=id&property=html_title&property=name&property=post_summary&property=publish_date&property=topic_ids&property=slug&property=featured_image", baseBlogURL, os.Getenv("hubSpotAPI")),
 		Method: http.MethodGet})
 }
 
 func getFeaturedPosts() ([]byte, error) {
 	return doRequest(request{
-		URL:    fmt.Sprintf("%s%s&limit=3&archived=false&property=id&property=html_title&property=name&property=slug&property=featured_image&content_group_id=3708593652&state=published", baseBlogURL, os.Getenv("hubSpotAPI")),
+		URL:    fmt.Sprintf("%s%s&limit=3&archived=false&property=id&property=html_title&property=name&property=slug&property=featured_image", baseBlogURL, os.Getenv("hubSpotAPI")),
 		Method: http.MethodGet})
 }
 
