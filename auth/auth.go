@@ -5,7 +5,7 @@ import (
 	"io/ioutil"
 	"net/http"
 
-	"github.com/wilsonelectronics/productsapi/cache"
+	"productsapi/cache"
 )
 
 // Jwks : Slice of json web keys for validating JWT sent with requests

@@ -7,12 +7,12 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/wilsonelectronics/productsapi/auth"
-	"github.com/wilsonelectronics/productsapi/blog"
-	"github.com/wilsonelectronics/productsapi/cache"
-	"github.com/wilsonelectronics/productsapi/category"
-	"github.com/wilsonelectronics/productsapi/product"
-	"github.com/wilsonelectronics/productsapi/tag"
+	"productsapi/auth"
+	"productsapi/blog"
+	"productsapi/cache"
+	"productsapi/category"
+	"productsapi/product"
+	"productsapi/tag"
 )
 
 // GetProduct . . .

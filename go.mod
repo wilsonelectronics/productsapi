@@ -8,5 +8,4 @@ require (
 	github.com/gorilla/handlers v1.4.2
 	github.com/gorilla/mux v1.7.4
 	github.com/piotrkowalczuk/ntypes v1.3.0
-	github.com/wilsonelectronics/productsapi v0.0.0-20200604191601-44e8e8b2e6c1
 )
