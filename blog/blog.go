@@ -133,16 +133,17 @@ type topicResponseModel struct {
 }
 
 type postData struct {
-	FeaturedImage string      `json:"featured_image"`
-	HTMLTitle     string      `json:"html_title"`
-	Name          string      `json:"name"`
-	ID            int         `json:"id"`
-	PostSummary   string      `json:"post_summary"`
-	PostBody      string      `json:"post_body"`
-	PublishDate   int         `json:"publish_date"`
-	Slug          string      `json:"slug"`
-	TopicIDs      []int64     `json:"topic_ids"`
-	BlogAuthor    *blogAuthor `json:"blog_author"`
+	FeaturedImage   string      `json:"featured_image"`
+	HTMLTitle       string      `json:"html_title"`
+	Name            string      `json:"name"`
+	ID              int         `json:"id"`
+	MetaDescription string      `json:"meta_description"`
+	PostSummary     string      `json:"post_summary"`
+	PostBody        string      `json:"post_body"`
+	PublishDate     int         `json:"publish_date"`
+	Slug            string      `json:"slug"`
+	TopicIDs        []int64     `json:"topic_ids"`
+	BlogAuthor      *blogAuthor `json:"blog_author"`
 }
 
 // GetSliderTopicsRecentPosts . . .
