@@ -1,4 +1,4 @@
-module productsapi
+module github.com/wilsonelectronics/productsapi
 
 go 1.14
 
@@ -8,5 +8,4 @@ require (
 	github.com/gorilla/handlers v1.4.2
 	github.com/gorilla/mux v1.7.4
 	github.com/piotrkowalczuk/ntypes v1.3.0
-	golang.org/x/crypto v0.0.0-20200622213623-75b288015ac9 // indirect
 )
